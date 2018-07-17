@@ -7,7 +7,9 @@ Flight Chain is one of the reference dApp deployments being put onto the SITA Av
 
 ### Architecture
 
-![alt text](./images/architecture.png "Flight Chain Architecture")
+![alt text](./images/architecture.jpg "Flight Chain Architecture")
+
+[Source architecture document](https://docs.google.com/drawings/d/1Zq-vAdJJv_G257eTWgB1CtkCOL1dma3JcDOeYaw4O4Q/edit)
 
 
 ### Deployment
