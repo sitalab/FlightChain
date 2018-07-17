@@ -5,6 +5,14 @@ Flight Chain is one of the reference dApp deployments being put onto the SITA Av
 
 
 
+### Architecture
+
+![alt text](./images/architecture.png "Flight Chain Architecture")
+
+
+### Deployment
+
+
 ### References
 SITA Flight Chain - https://www.sita.aero/resources/blog/blockchain-in-air-travel
 
