@@ -1,6 +1,18 @@
 # FlightChain
 
-Flight Chain is one of the reference dApp deployments being put onto the SITA Aviation Blockchain Sandbox. It aggregrates flight data from multiple sources and creates a single version of the truth on a private permissioned blockchain. 
+Flight Chain is one of the reference dApp deployments being put onto the SITA Aviation Blockchain Sandbox. 
+It aggregrates flight data from multiple sources and creates a single version of the truth for flight status information 
+on a private permissioned blockchain.
+
+This dApp is open to any airline & airport to integrate into. Airlines & airports can publish updates from their AODB
+and can query the network to get the complete flight status data (which includes authoritative data from airline, 
+origin airport and destination airport).
+
+
+![alt text](images/flightchain.jpg "Flight Chain Network")
+Figure 1 - illustration of original Flight Chain network. 
+
+
 
 
 ## Table of Contents
@@ -14,6 +26,7 @@ Flight Chain is one of the reference dApp deployments being put onto the SITA Av
 ## Architecture <a name="architecture"></a>
 
 ![alt text](images/architecture.jpg "Flight Chain Architecture")
+Figure 2 - high level architecture overview.
 
 This simplified three layer diagram shows:
  
@@ -127,4 +140,4 @@ ACI ACRIS - https://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS
 
 Hyperledger Fabric - https://hyperledger-fabric.readthedocs.io/
 
-Coode of Conduct - (./CODE-OF-CONDUCT.md)
+Coode of Conduct - (../blob/master/CODE-OF-CONDUCT.md)
