@@ -140,4 +140,4 @@ ACI ACRIS - https://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS
 
 Hyperledger Fabric - https://hyperledger-fabric.readthedocs.io/
 
-Coode of Conduct - [../blob/master/CODE-OF-CONDUCT.md]
+Coode of Conduct - [CODE-OF-CONDUCT.md](CODE-OF-CONDUCT.md)
