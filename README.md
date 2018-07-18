@@ -3,9 +3,15 @@
 Flight Chain is one of the reference dApp deployments being put onto the SITA Aviation Blockchain Sandbox. It aggregrates flight data from multiple sources and creates a single version of the truth on a private permissioned blockchain. 
 
 
+## Table of Contents
 
+- [Architecture](#architecture)
+- [REST API](#rest-apis)
+- [ACI ACRIS](#aci-acris)
+- [Deployment (TODO)](#deployment)
+- [References](#references)
 
-### Architecture
+## Architecture <a name="architecture"></a>
 
 ![alt text](images/architecture.jpg "Flight Chain Architecture")
 
@@ -25,12 +31,7 @@ the REST API.
 To comment on this diagram, see the [source architecture document](https://docs.google.com/drawings/d/1Zq-vAdJJv_G257eTWgB1CtkCOL1dma3JcDOeYaw4O4Q/edit)
 
 
-
-### ACI ACRIS
-There are many existing data standards for representing flight status data. Flight Chain uses [ACRIS](http://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS) 
-(a standard defined by [ACI](http://www.aci.aero)). This is a compact & modern data format using JSON with a well defined schema.
-
-### Sample APIs
+### REST APIs <a name="rest-apis"></a>
 
 
 #### 1. Add new flight
@@ -108,13 +109,22 @@ This API call shows an example of retrieving the history of all updates to a fli
 curl -X GET 'https://flightchain.blockchainsandbox.aero/2017-04-05MIAAA1481/history'
 ```
 
-### Deployment
+### ACI ACRIS  <a name="aci-acris"></a>
+There are many existing data standards for representing flight status data. Flight Chain uses [ACRIS](http://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS) 
+(a standard defined by [ACI](http://www.aci.aero)). This is a compact & modern data format using JSON with a well defined schema.
+
+
+### Deployment <a name="deployment"></a>
 
 TBD
 
-### References
+### References <a name="references"></a>
 SITA Flight Chain - https://www.sita.aero/resources/blog/blockchain-in-air-travel
 
 Aviation Blockchain Sandbox - https://www.developer.aero/Blockchain/Aviation-Blockchain-Sandbox
 
-ACI ACRIS - http://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS
+ACI ACRIS - https://www.aci.aero/About-ACI/Priorities/Airport-IT/ACRIS
+
+Hyperledger Fabric - https://hyperledger-fabric.readthedocs.io/
+
+Coode of Conduct - (./CODE-OF-CONDUCT.md)
