@@ -115,8 +115,7 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-    #    - ./../chaincode/:/opt/gopath/src/github.com/
-        - ../../FlightChain/chaincode/:/opt/gopath/src/github.com/
+        - ../chaincode/:/opt/src/node
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
     networks:
         - basic

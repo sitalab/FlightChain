@@ -1,4 +1,4 @@
-import {ClientIdentity} from "fabric-shim";
+import {ClientIdentity} from 'fabric-shim';
 
 export class CertificateHelper {
 

@@ -1,9 +1,7 @@
-import {ClientIdentity} from "fabric-shim";
-import {AcrisFlight} from "./acris-schema/AcrisFlight";
-
+import {ClientIdentity} from 'fabric-shim';
+import {AcrisFlight} from './acris-schema/AcrisFlight';
 
 export class FlightChainLogic {
-
 
     /**
      * Generate the unique flight key from the ACRIS data.
@@ -20,7 +18,6 @@ export class FlightChainLogic {
         return flightKey;
     }
 
-
     /**
      * Validate the ACRIS json data.
      *
@@ -28,7 +25,6 @@ export class FlightChainLogic {
      * @throws Error if the ACRIS is not valid
      */
     static verifyValidACRIS(flight: AcrisFlight): void {
-
 
         if (!flight || !flight.operatingAirline || !flight.operatingAirline.iataCode || flight.operatingAirline.iataCode.length !== 2) {
             let msg = `Invalid flight data, there is no valid flight.operatingAirline.iataCode set.`;
@@ -80,7 +76,6 @@ export class FlightChainLogic {
             }
         }
     }
-
 
     /**
      * If iata_code is 2, assume airline. Otherwise assume airport.

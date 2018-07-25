@@ -9,7 +9,7 @@ and can query the network to get the complete flight status data (which includes
 origin airport and destination airport).
 
 
-![alt text](images/flightchain.jpg "Flight Chain Network")
+![alt text](docs/images/flightchain.jpg "Flight Chain Network")
 Figure 1 - illustration of original Flight Chain network. 
 
 
@@ -25,7 +25,7 @@ Figure 1 - illustration of original Flight Chain network.
 
 ## Architecture <a name="architecture"></a>
 
-![alt text](images/architecture.jpg "Flight Chain Architecture")
+![alt text](docs/images/architecture.jpg "Flight Chain Architecture")
 Figure 2 - high level architecture overview.
 
 This simplified three layer diagram shows:

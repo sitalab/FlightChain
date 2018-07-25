@@ -61,7 +61,6 @@ export class OperatingAirline {
     name: string;
 }
 
-
 /**
  * The departure infomation for the flight
  */
@@ -206,16 +205,16 @@ export class AcrisFlight {
      * The status of the flight
      */
     flightStatus:
-        | "Canceled"
-        | "Diverted"
-        | "Scheduled"
-        | "Boarding"
-        | "GateClosed"
-        | "Departed"
-        | "InApproach"
-        | "Landed"
-        | "BagClaimStarted"
-        | "FlightFinished";
+        | 'Canceled'
+        | 'Diverted'
+        | 'Scheduled'
+        | 'Boarding'
+        | 'GateClosed'
+        | 'Departed'
+        | 'InApproach'
+        | 'Landed'
+        | 'BagClaimStarted'
+        | 'FlightFinished';
     /**
      * A list of airports and the corresponding arrival and departure information for stops during the flight. The order in the array represents the flight order.
      */

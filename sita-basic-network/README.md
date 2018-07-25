@@ -1,8 +1,11 @@
 # Basic Network Config
 
+This folder contains the scripts & config to run a simple Fabric network on your local dev machine. It assumes that 
+you have gone through the installation process in https://github.com/hyperledger/fabric-samples.
+
 This config is adoped from https://github.com/hyperledger/fabric-samples/tree/release-1.2/first-network
 
-## Generate
+## Step 1 - Generate
 
 Note that this basic configuration uses pre-generated certificates and
 key material, and also has predefined transactions to initialize a 
@@ -10,11 +13,11 @@ channel named "mychannel".
 
 To regenerate this material, simply run ``generate.sh``.
 
-## Starting the network
+## Step 2 -  Start the network
 
 Run ``start.sh`` to bring up the network.  
 
-Check that all the images are running by running `docker ps`. You should see these 4 images. 
+Check that all the images are running by running `docker ps`. You should see these 5 images. 
 
 ```
 KOS:sita-basic-network kosullivan$ docker ps
@@ -23,10 +26,14 @@ CONTAINER ID        IMAGE                        COMMAND                  CREATE
 57d6a896fbe5        hyperledger/fabric-couchdb   "tini -- /docker-ent…"   14 seconds ago      Up 14 seconds       4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp       couchdb
 823366705d09        hyperledger/fabric-ca        "sh -c 'fabric-ca-se…"   14 seconds ago      Up 15 seconds       0.0.0.0:7054->7054/tcp                           ca.example.com
 2fafca22605d        hyperledger/fabric-orderer   "orderer"                14 seconds ago      Up 15 seconds       0.0.0.0:7050->7050/tcp                           orderer.example.com
-
+f766711953a5        hyperledger/fabric-tools     "/bin/bash"              17 seconds ago      Up 19 seconds                                                        cli
 ```
 
-## Stopping & Cleaning up...
+You can view the log output from the network by running.
+
+`docker-compose logs -f`
+
+## Step 3 - Stopping & Cleaning up...
 
 To stop it, run ``stop.sh``
 To completely remove all incriminating evidence of the network

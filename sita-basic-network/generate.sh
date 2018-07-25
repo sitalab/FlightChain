@@ -64,6 +64,9 @@ export PRIV_KEY=$(ls *_sk)
 cd "$CURRENT_DIR"
 
 sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose.yml
+ if [ "$ARCH" == "Darwin" ]; then
+    rm docker-compose.ymlt
+  fi
 
 
 

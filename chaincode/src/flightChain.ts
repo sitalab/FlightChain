@@ -7,9 +7,9 @@
 'use strict';
 
 import {Chaincode, StubHelper} from '@theledger/fabric-chaincode-utils';
-import {CertificateHelper} from "./certificateHelper";
-import {FlightChainLogic} from "./flightChainLogic";
-import {AcrisFlight} from "./acris-schema/AcrisFlight";
+import {CertificateHelper} from './certificateHelper';
+import {FlightChainLogic} from './flightChainLogic';
+import {AcrisFlight} from './acris-schema/AcrisFlight';
 
 export class FlightChain extends Chaincode {
 
@@ -94,8 +94,6 @@ export class FlightChain extends Chaincode {
             console.error(msg);
             throw new Error(msg);
         }
-
-
 
         FlightChainLogic.verifyValidACRIS(flight);
         FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, flight);
