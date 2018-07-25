@@ -1,4 +1,4 @@
-import {Get, Controller, Param, HttpStatus, Post, Body} from '@nestjs/common';
+import {Get, Controller, Param, HttpStatus, Post, Body, HttpException} from '@nestjs/common';
 import {FlightChainService} from "./fight-chain.service";
 import {AcrisFlight} from "../acris-schema/AcrisFlight";
 import {ApiImplicitBody, ApiImplicitParam, ApiOperation, ApiResponse, ApiUseTags} from "@nestjs/swagger";
@@ -46,7 +46,19 @@ export class FlightChainController {
     @Post()
     public async createFlight(@Body() flight: AcrisFlight): Promise<AcrisFlight> {
         console.log('FlightChainController.createFlight()');
-        return this.flightChainService.createFlight(flight);
+
+        // const user: User = await this.userService.findOneById(params.id);
+        // if (user === undefined) {
+        //     throw new HttpException('Invalid user', HttpStatus.BAD_REQUEST);
+        // }
+        // return user;
+
+
+        const flightCreated: AcrisFlight = await  this.flightChainService.createFlight(flight);
+        if (flightCreated === undefined) {
+            throw new HttpException('Invalid flight', HttpStatus.BAD_REQUEST);
+        }
+        return flightCreated;
     }
 
     @ApiOperation({ title: 'Update an existing flight on the network' })
