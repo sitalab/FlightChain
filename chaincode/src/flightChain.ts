@@ -110,7 +110,6 @@ export class FlightChain extends Chaincode {
         flight.docType = 'flight';
 
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
-        flight.txId = stubHelper.getStub().getTxID();
         flight.updaterId = iataCode;
 
         await stubHelper.putState(flightKey, flight);
@@ -150,7 +149,6 @@ export class FlightChain extends Chaincode {
         console.log('existingFlight', existingFlight);
         console.log('mergedFlight', mergedFlight);
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
-        mergedFlight.txId = stubHelper.getStub().getTxID();
         mergedFlight.updaterId = iataCode;
 
         await stubHelper.putState(flightKey, mergedFlight);

@@ -51,7 +51,6 @@ describe('Test FlightChain', () => {
 
         // These should be added on by the chaincode.
         flightObject.docType = 'flight';
-        flightObject.txId = 'tx1';
         flightObject.updaterId = 'BA';
         expect(Transform.bufferToObject(response.payload)).to.deep.eq(flightObject);
 
@@ -335,6 +334,5 @@ function createFlight(originDate: string, operatingAirline: string, flightNumber
         '  },\n' +
         '  "flightStatus": "Scheduled"\n' +
         '}';
-    let flightObject = JSON.parse(flightJson);
-    return flightObject;
+    return JSON.parse(flightJson);
 }
