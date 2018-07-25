@@ -17,11 +17,32 @@ Figure 1 - illustration of original Flight Chain network.
 
 ## Table of Contents
 
+- [Run on local dev machine](#localdev)
 - [Architecture](#architecture)
 - [REST API](#rest-apis)
 - [ACI ACRIS](#aci-acris)
 - [Deployment (TODO)](#deployment)
 - [References](#references)
+
+## Running chaincode on local dev environment <a name="localdev"></a>
+
+This repo comes complete with a Fabric network configration. This will work, assuming that you have
+already checked out https://github.com/hyperledger/fabric-samples and have gone through the pre-requiset 
+steps for fabric-samples.
+
+### Start network & deploy chaincode locally.
+
+The chaincode is in the [chaincode](./chaincode) directory. There is a script [deployChainCode.sh](./chaincode/deployChainCode.sh)
+in this network which will setup the local network (the config for this is in [sita-basic-network](sita-basic-network)), and
+will then deploy the chaincode onto this network. Go to [chaincode](./chaincode) for more details.
+
+
+### Testing the API.
+
+The API interface is in [flight-chain-api](flight-chain-api). This exposes a REST interface to create, update & view
+flight data. There is a swagger documented API which makes it easy to test the API & chaincode.
+
+
 
 ## Architecture <a name="architecture"></a>
 
