@@ -34,7 +34,7 @@ export class FlightChainService {
         });
         this.channel.addOrderer(this.fabric_client.newOrderer(this.ordererEndpoint));
 
-        var store_path = path.join('/Users/kosullivan/Dev/Blockchain2/fabric-samples/fabcar/', 'hfc-key-store');
+        var store_path = path.join('./bootstrap/', 'hfc-key-store');
         console.log('Store path:' + store_path);
 
         // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
@@ -56,7 +56,7 @@ export class FlightChainService {
             if (user_from_store && user_from_store.isEnrolled()) {
                 console.log('Successfully loaded ' + this.username + ' from persistence');
             } else {
-                throw new Error('Failed to get ' + this.username + '.... run registerUser.js');
+                throw new Error('Failed to get ' + this.username + '.... Did you run "node bootstrap/enrollAdmin.js && node bootstrap/registerUser.js""');
             }
         })
 

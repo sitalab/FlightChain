@@ -30,7 +30,7 @@ This repo comes complete with a Fabric network configration. This will work, ass
 already checked out https://github.com/hyperledger/fabric-samples and have gone through the pre-requiset 
 steps for fabric-samples.
 
-### Start network & deploy chaincode locally.
+### Start network & deploy chaincode locally.
 
 The chaincode is in the [chaincode](./chaincode) directory. There is a script [deployChainCode.sh](./chaincode/deployChainCode.sh)
 in this network which will setup the local network (the config for this is in [sita-basic-network](sita-basic-network)), and

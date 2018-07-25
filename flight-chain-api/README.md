@@ -10,9 +10,17 @@ blockchain so the operations are Create, Read, Update.
 
 ## Installation
 
+Run this to install all the node_modules.
+
 ```bash
 $ npm install
 ```
+
+## Register admin/users
+
+For local testing, it is necessary to bootstrap the network with an admin user
+and some airline/airport users.
+
 
 ## Running the app
 

@@ -9,13 +9,6 @@ export class FlightChainController {
     constructor(private readonly flightChainService: FlightChainService) {
     }
 
-    @ApiOperation({title: 'Get all Flights', description: 'Return all flights in the world state '})
-    @Get()
-    public async getAll(): Promise<AcrisFlight[]> {
-        console.log('FlightChainController.getAll()');
-        return this.flightChainService.findAll();
-    }
-
     @ApiOperation({title: 'Get one flight', description: 'Returns the live state of the flight identified by flightKey'})
     @ApiImplicitParam({name: 'flightKey', type: 'string', required: true, description: 'Unique key for each flight. The key is made up of [DepDate][DepAirport][OperatingAirline][OperatingFlightNum]. e.g. 2018-07-22LGWBA0227'})
     @Get('/:flightKey')
