@@ -14,7 +14,7 @@ Run `npm install` to install the node_modules.
 Run `npm run test:w` to enter into watch mode testing the chaincode on each file edit.
 
 
-## Deploying chaincode
+## Deploying chaincode locally
 
 Run `./deployChainCode.sh -v 1.0 -n flightchain` to rebuild the network and redeploy the chaincode.
 

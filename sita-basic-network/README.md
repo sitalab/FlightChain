@@ -5,6 +5,11 @@ you have gone through the installation process in https://github.com/hyperledger
 
 This config is adoped from https://github.com/hyperledger/fabric-samples/tree/release-1.2/first-network
 
+### Note
+You generally won't start this network directly from this folder. It will be started automatically
+by the chaincode/deployChainCode.sh script [in chaincode](../chaincode)
+
+
 ## Step 1 - Generate
 
 Note that this basic configuration uses pre-generated certificates and
