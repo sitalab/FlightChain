@@ -1,4 +1,4 @@
-import {Get, Controller, Param, HttpStatus, Post, Body, HttpException} from '@nestjs/common';
+import {Get, Controller, Param, HttpStatus, Post, Body, HttpException, Patch} from '@nestjs/common';
 import {FlightChainService} from "./fight-chain.service";
 import {AcrisFlight} from "../acris-schema/AcrisFlight";
 import {ApiImplicitBody, ApiImplicitParam, ApiOperation, ApiResponse, ApiUseTags} from "@nestjs/swagger";
@@ -36,8 +36,8 @@ export class FlightChainController {
         status: 201,
         description: 'The flight record has been successfully created.',
     })
-    @Post()
-    public async createFlight(@Body() flight: AcrisFlight): Promise<AcrisFlight> {
+    @Post('/:flightKey')
+    public async createFlight(@Param('flightKey') flightKey, @Body() flight: AcrisFlight): Promise<AcrisFlight> {
         console.log('FlightChainController.createFlight()');
 
         // const user: User = await this.userService.findOneById(params.id);
@@ -54,13 +54,15 @@ export class FlightChainController {
         return flightCreated;
     }
 
+
+
     @ApiOperation({ title: 'Update an existing flight on the network' })
     @ApiResponse({
         status: 201,
         description: 'The flight record has been successfully updated.',
     })
     @ApiImplicitParam({name: 'flightKey', type: 'string', required: true, description: 'Unique key for each flight. The key is made up of [DepDate][DepAirport][OperatingAirline][OperatingFlightNum]. e.g. 2018-07-22LGWBA0227'})
-    @Post('/:flightKey')
+    @Patch('/:flightKey')
     public async updateFlight(@Param('flightKey') flightKey, @Body() flight: AcrisFlight): Promise<AcrisFlight> {
         console.log('FlightChainController.updateFlight()');
         return this.flightChainService.updateFlight(flightKey, flight);

@@ -77,7 +77,7 @@ export class FlightChain extends Chaincode {
      * @returns {Promise<void>}
      */
     async createFlight(stubHelper: StubHelper, args: string[]): Promise<any> {
-        console.log('============= START : Create Car ===========');
+        console.log('============= START : Create Flight ===========');
         console.log('stub.getCreator', stubHelper.getClientIdentity());
 
         let iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
@@ -113,7 +113,7 @@ export class FlightChain extends Chaincode {
         flight.updaterId = iataCode;
 
         await stubHelper.putState(flightKey, flight);
-        console.log('============= END : Create Car ===========');
+        console.log('============= END : Create Flight ===========');
     }
 
     /**
@@ -124,7 +124,7 @@ export class FlightChain extends Chaincode {
      * @returns {Promise<void>}
      */
     async updateFlight(stubHelper: StubHelper, args: string[]): Promise<any> {
-        console.log('============= START : updateFlight ===========');
+        console.log(`============= START : updateFlight key ${args[0]} ===========`);
         if (args.length !== 2) {
             throw new Error('Incorrect number of arguments. Expecting 2 (flightKey & new flight data)');
         }
@@ -133,21 +133,25 @@ export class FlightChain extends Chaincode {
         let flightKey = args[0];
         let flightDelta = JSON.parse(args[1]);
 
-        FlightChainLogic.verifyValidACRIS(flightDelta);
-        FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, flightDelta);
 
         // TODO: Verify that the flight already exists & return appropriate error 404 message if it does not exist
-        let existingFlight = await stubHelper.getStateAsObject(flightKey);
+        let existingFlight:any = await stubHelper.getStateAsObject(flightKey);
         if (!existingFlight) {
             let msg = `A flight with this flight key '${flightKey}' does not yet exist. It must be created first`;
             console.error(msg);
             throw new Error(msg);
         }
 
+
+        FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, existingFlight);
+
         let mergedFlight = Object.assign({}, existingFlight, flightDelta);
         console.log('flightDelta', flightDelta);
         console.log('existingFlight', existingFlight);
         console.log('mergedFlight', mergedFlight);
+
+        FlightChainLogic.verifyValidACRIS(mergedFlight);
+
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
         mergedFlight.updaterId = iataCode;
 

@@ -21,6 +21,23 @@ $ npm install
 For local testing, it is necessary to bootstrap the network with an admin user
 and some airline/airport users.
 
+First you have to enroll an admin user onto the system:
+
+`node bootstrap/enrollAdmin.js`
+
+Then you need to register users. 
+
+`node bootstrap/registerUser.js <airline/airport code>`
+
+
+e.g. this will register a British Airways user and a Miami Airport user
+
+```
+node bootstrap/registerUser.js BA
+node bootstrap/registerUser.js MIA
+
+```
+
 
 ## Running the app
 

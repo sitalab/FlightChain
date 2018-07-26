@@ -16,20 +16,19 @@ export class FlightChainService {
     private member_user;
 
     // TODO - should channel name be env or API param, or other?
-    private username = 'BA';
-
+    private username = 'LGA';
     private channelName = 'mychannel';
     private peerEndpoints: string[] = ['grpc://localhost:7051'];
-    private ordererEndpoint  = 'grpc://localhost:7050';
+    private ordererEndpoint = 'grpc://localhost:7050';
 
     constructor() {
 
         this.fabric_client = new Fabric_Client();
         // TODO - should channel name be env or API param?
         this.channel = this.fabric_client.newChannel(this.channelName);
-        // TODO - change to env variable
+        // TODO - change Peers & Orderers to env variable
         this.peerEndpoints.forEach(peer => {
-            console.log('Adding peer endpoing '+peer);
+            console.log('Adding peer endpoing ' + peer);
             this.channel.addPeer(this.fabric_client.newPeer(peer));
         });
         this.channel.addOrderer(this.fabric_client.newOrderer(this.ordererEndpoint));
@@ -89,7 +88,6 @@ export class FlightChainService {
     }
 
 
-
     public async createFlight(flight: AcrisFlight): Promise<any> {
         console.log('FlightChainService.createFlight()');
 
@@ -98,7 +96,7 @@ export class FlightChainService {
         console.log("Assigning transaction_id: ", tx_id._transaction_id);
 
         // must send the proposal to endorsing peers
-        let request:ChaincodeInvokeRequest = {
+        let request: ChaincodeInvokeRequest = {
             //targets: let default to the peer assigned to the client
             chaincodeId: 'flightchain',
             fcn: 'createFlight',
@@ -110,6 +108,7 @@ export class FlightChainService {
         };
         return this.commitTransaction(request);
     }
+
     public async updateFlight(flightKey: string, flightDelta: AcrisFlight): Promise<AcrisFlight> {
         console.log('FlightChainService.updateFlight()');
 
@@ -138,8 +137,7 @@ export class FlightChainService {
      * @param {Client.ChaincodeInvokeRequest} transactionProposalRequest
      * @returns {Promise<any>}
      */
-    private async commitTransaction(transactionProposalRequest:ChaincodeInvokeRequest): Promise<any> {
-
+    private async commitTransaction(transactionProposalRequest: ChaincodeInvokeRequest): Promise<any> {
 
 
         var sendTransactionProposalResults = await this.channel.sendTransactionProposal(transactionProposalRequest).catch((err) => {
@@ -250,30 +248,29 @@ export class FlightChainService {
         return event_hubResponse;
     }
 
-    private queryChainCodeState(request) {
-        return  new Promise<any>((resolve, reject) => {
-            this.channel.queryByChaincode(request)
-                .then((query_responses) => {
-                    console.log('query_responses', query_responses);
-
-                    if (query_responses && query_responses.length == 1) {
-                        if (query_responses[0] instanceof Error) {
-                            console.error('error from query = ', query_responses[0]);
-                            reject(query_responses[0]);
-                        } else {
-                            console.log('Response is ', query_responses[0].toString());
-                        }
-                    } else {
-                        console.log('No payloads were returned from query');
-                        reject(query_responses[0]);
-
-                    }
-                    resolve(JSON.parse(query_responses[0].toString()));
-                })
-                .catch((error) => {
-                    console.log(error);
-                    reject(error);
-                })
+    private async queryChainCodeState(request): Promise<AcrisFlight> {
+        // return  new Promise<any>((resolve, reject) => {
+        let query_responses = await this.channel.queryByChaincode(request).catch((err) => {
+            console.error('queryByChaincode', err);
+            throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
+
+        if (query_responses && query_responses.length == 1) {
+            if (query_responses[0] instanceof Error) {
+                console.error('error from query = ', query_responses[0]);
+                throw new HttpException(query_responses[0], HttpStatus.INTERNAL_SERVER_ERROR);
+            } else {
+
+                if (query_responses[0].toString().length === 0) {
+                    throw new HttpException(`No matching flight for flightKey`, HttpStatus.NOT_FOUND);
+                } else {
+                    console.log('Response is ', query_responses[0].toString());
+                }
+            }
+        } else {
+            console.error('No payloads were returned from query');
+            throw new HttpException(query_responses[0], HttpStatus.NOT_FOUND);
+        }
+        return JSON.parse(query_responses[0].toString());
     }
 }
