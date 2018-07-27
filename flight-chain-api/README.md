@@ -21,7 +21,13 @@ $ npm install
 For local testing, it is necessary to bootstrap the network with an admin user
 and some airline/airport users.
 
-First you have to enroll an admin user onto the system:
+> **NOTE** You must run this every time you rebuild your blockchain network.
+
+First of all, purge all existing keys created from a previous run.
+
+`rm -rf bootstrap/hfc-key-store`
+
+`Then you have to enroll an admin user onto the system:
 
 `node bootstrap/enrollAdmin.js`
 
