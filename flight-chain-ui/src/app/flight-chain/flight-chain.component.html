@@ -1,0 +1,29 @@
+<div fxLayout="column">
+  <mat-card fxFlex="100%">
+    <mat-card-title>
+      Search Flight Chain
+    </mat-card-title>
+    <mat-card-content >
+      <form novalidate>
+        <mat-form-field fxFlex="50%" hintLabel="e.g. 2017-07-01LHRBA0222">
+          <input matInput placeholder="Enter a Flight Key" [formControl]="flightKey">
+          <mat-error *ngIf="flightKey.invalid">{{getInputErrorMessage()}}</mat-error>
+        </mat-form-field>
+
+        <button color="primary" mat-raised-button (click)="onClickSearch()">Search</button>
+        <mat-spinner *ngIf="loadingFlight" [diameter]="30"></mat-spinner>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex="100%" *ngIf="error" style="background: orangered">
+    <mat-card-content >
+      {{getErrorMessage()}}
+    </mat-card-content>
+  </mat-card>
+  <mat-card fxFlex="100%" *ngIf="flight">
+    <mat-card-content>
+      {{flight | json}}
+    </mat-card-content>
+  </mat-card>
+</div>
+

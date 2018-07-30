@@ -35,5 +35,4 @@ f149a5fc5a62        hyperledger/fabric-peer                                     
 8c8e6c17db38        hyperledger/fabric-orderer                                                                                    "orderer"                About an hour ago   Up About an hour    0.0.0.0:7050->7050/tcp                           orderer.example.com
 dd7157e180bf        hyperledger/fabric-tools                                                                                      "/bin/bash"              About an hour ago   Up About an hour                                                     cli
 2c81a09874aa        hyperledger/fabric-couchdb                                                                                    "tini -- /docker-ent…"   About an hour ago   Up About an hour    4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp       couchdb
-
 ```
