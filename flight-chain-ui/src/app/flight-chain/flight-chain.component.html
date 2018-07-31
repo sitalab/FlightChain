@@ -3,7 +3,7 @@
     <mat-card-title>
       Search Flight Chain
     </mat-card-title>
-    <mat-card-content >
+    <mat-card-content>
       <form novalidate>
         <mat-form-field fxFlex="50%" hintLabel="e.g. 2017-07-01LHRBA0222">
           <input matInput placeholder="Enter a Flight Key" [formControl]="flightKey">
@@ -16,14 +16,57 @@
     </mat-card-content>
   </mat-card>
   <mat-card fxFlex="100%" *ngIf="error" style="background: orangered">
-    <mat-card-content >
+    <mat-card-content>
       {{getErrorMessage()}}
     </mat-card-content>
   </mat-card>
-  <mat-card fxFlex="100%" *ngIf="flight">
-    <mat-card-content>
-      {{flight | json}}
-    </mat-card-content>
-  </mat-card>
+
+  <div *ngIf="flightHistory" fxLayout="column">
+
+
+    <mat-card fxFlex="100%" style="background: darkgrey">
+      <mat-card-title>
+        <h3>Live status</h3>
+      </mat-card-title>
+      <mat-card-content>
+        <div fxLayout="row">
+          <div fxLayout="column">
+            <p>Flight: <span *ngIf="flightLive.value.operatingAirline">{{flightLive.value.operatingAirline.name}} </span>{{flightLive.value.flightNumber.airlineCode}}
+              {{flightLive.value.flightNumber.trackNumber}}</p>
+            <div class="from_to">
+              {{flightLive.value.departureAirport}} to {{flightLive.value.arrivalAirport}}
+              (<span *ngIf="flightLive.value.flightStatus">{{flightLive.value.flightStatus}}</span><span *ngIf="!flightLive.value.flightStatus">Status unknown</span>)
+            </div>
+            <p>Last update from: {{flightLive.value.updaterId}}</p>
+            <p>When: {{ (flightLive.timestamp.low | amFromUnix) | amTimeAgo}}</p>
+            <p>TxId: {{ flightLive.tx_id}}</p>
+          </div>
+          <p>
+          <pre>
+            {{flightLive.value | json}}
+          </pre>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex="100%">
+      <mat-card-title>
+        <h3>History</h3>
+      </mat-card-title>
+      <mat-card-content  *ngFor="let flight of flightHistory | reverse">
+        <div fxLayout="row">
+          <div fxLayout="column">
+          <p>Updater: {{flight.value.updaterId}}</p>
+          <p>When: {{ (flight.timestamp.low | amFromUnix) | amTimeAgo}}</p>
+            <p>TxId: {{ flight.tx_id}}</p>
+          </div>
+          <p>
+          <pre>
+            {{flight.value | json}}
+          </pre>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
 

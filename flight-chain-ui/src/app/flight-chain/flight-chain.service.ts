@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Observable, of} from "rxjs";
-import {AcrisFlight} from "../acris-schema/AcrisFlight";
-import {catchError, tap} from "rxjs/operators";
-import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import {NGXLogger} from "ngx-logger";
+import {Observable, of} from 'rxjs';
+import {AcrisFlight} from '../acris-schema/AcrisFlight';
+import {catchError, tap} from 'rxjs/operators';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {NGXLogger} from 'ngx-logger';
 
 @Injectable({
   providedIn: 'root'
@@ -16,12 +16,20 @@ export class FlightChainService {
 
   private flightURL = 'http://localhost:3000/';  // URL to web api
 
-  /** GET heroes from the server */
+  /** GET one flight from the server */
   getFlight(flightKey: String): Observable<AcrisFlight | HttpErrorResponse> {
     return this.http.get<AcrisFlight>(this.flightURL + flightKey)
       .pipe(
         tap(flight => this._logger.debug('fetched flight')),
         catchError(this.handleError('getFlight', null))
+      );
+  }
+  /** GET history of updates for a flight from the server */
+  getFlightHistory(flightKey: String): Observable<any| HttpErrorResponse> {
+    return this.http.get<any>(this.flightURL + flightKey+'/history')
+      .pipe(
+        tap(flight => this._logger.debug('fetched flight history')),
+        catchError(this.handleError('getFlightHistory', null))
       );
   }
 
@@ -44,5 +52,6 @@ export class FlightChainService {
       return of(error);
     };
   }
+
 
 }
