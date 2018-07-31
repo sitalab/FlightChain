@@ -12,7 +12,7 @@ export MSYS_NO_PATHCONV=1
 
 docker-compose -f docker-compose.yml down
 
-docker-compose -f docker-compose.yml up -d ca.example.com orderer.example.com peer0.org1.example.com couchdb cli
+docker-compose -f docker-compose.yml up -d ca.sita.aero orderer.sita.aero peer0.sandbox.sita.aero couchdb cli
 
 # wait for Hyperledger Fabric to start
 # incase of errors when running later commands, issue export FABRIC_START_TIMEOUT=<larger number>
@@ -21,9 +21,9 @@ export FABRIC_START_TIMEOUT=10
 sleep ${FABRIC_START_TIMEOUT}
 
 # Create the channel
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel create -o orderer.example.com:7050 -c mychannel -f /etc/hyperledger/configtx/channel.tx
-# Join peer0.org1.example.com to the channel.
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel join -b mychannel.block
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@sandbox.sita.aero/msp" peer0.sandbox.sita.aero peer channel create -o orderer.sita.aero:7050 -c channel-flight-chain -f /etc/hyperledger/configtx/channel.tx
+# Join peer0.sandbox.sita.aero to the channel.
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@sandbox.sita.aero/msp" peer0.sandbox.sita.aero peer channel join -b channel-flight-chain.block
 
 
 echo ""

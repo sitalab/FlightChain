@@ -11,7 +11,7 @@ OrdererOrgs:
   # Orderer
   # ---------------------------------------------------------------------------
   - Name: Orderer
-    Domain: example.com
+    Domain: sita.aero
     # ---------------------------------------------------------------------------
     # "Specs" - See PeerOrgs below for complete description
     # ---------------------------------------------------------------------------
@@ -22,10 +22,10 @@ OrdererOrgs:
 # ---------------------------------------------------------------------------
 PeerOrgs:
   # ---------------------------------------------------------------------------
-  # Org1
+  # OrgSITA
   # ---------------------------------------------------------------------------
-  - Name: Org1
-    Domain: org1.example.com
+  - Name: OrgSITA
+    Domain: sandbox.sita.aero
     # ---------------------------------------------------------------------------
     # "Specs"
     # ---------------------------------------------------------------------------
@@ -43,8 +43,8 @@ PeerOrgs:
     #                 Org.Domain, respectively.
     # ---------------------------------------------------------------------------
     # Specs:
-    #   - Hostname: foo # implicitly "foo.org1.example.com"
-    #     CommonName: foo27.org5.example.com # overrides Hostname-based FQDN set above
+    #   - Hostname: foo # implicitly "foo.sandbox.sita.aero"
+    #     CommonName: foo27.org5.sita.aero # overrides Hostname-based FQDN set above
     #   - Hostname: bar
     #   - Hostname: baz
     # ---------------------------------------------------------------------------

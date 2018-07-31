@@ -17,7 +17,7 @@ export class FlightChainService {
 
     // TODO - should channel name be env or API param, or other?
     private username = 'LGA';
-    private channelName = 'mychannel';
+    private channelName = 'channel-flight-chain';
     private peerEndpoints: string[] = ['grpc://localhost:7051'];
     private ordererEndpoint = 'grpc://localhost:7050';
 
@@ -101,7 +101,7 @@ export class FlightChainService {
             chaincodeId: 'flightchain',
             fcn: 'createFlight',
             args: [JSON.stringify(flight)],
-            // chainId: 'mychannel',
+            // chainId: 'channel-flight-chain',
             txId: tx_id,
             // proposalResponses: null,
             // proposal: null
@@ -122,7 +122,7 @@ export class FlightChainService {
             chaincodeId: 'flightchain',
             fcn: 'updateFlight',
             args: [flightKey, JSON.stringify(flightDelta)],
-            chainId: 'mychannel',
+            chainId: 'channel-flight-chain',
             txId: tx_id,
             proposalResponses: null,
             proposal: null
