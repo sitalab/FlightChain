@@ -10,6 +10,7 @@ import {Chaincode, StubHelper} from '@theledger/fabric-chaincode-utils';
 import {CertificateHelper} from './certificateHelper';
 import {FlightChainLogic} from './flightChainLogic';
 import {AcrisFlight} from './acris-schema/AcrisFlight';
+var merge = require('deepmerge')
 
 export class FlightChain extends Chaincode {
 
@@ -111,6 +112,7 @@ export class FlightChain extends Chaincode {
 
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
         flight.updaterId = iataCode;
+        flight.txId = stubHelper.getStub().getTxID();
 
         await stubHelper.putState(flightKey, flight);
         console.log('============= END : Create Flight ===========');
@@ -145,7 +147,7 @@ export class FlightChain extends Chaincode {
 
         FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, existingFlight);
 
-        let mergedFlight = Object.assign({}, existingFlight, flightDelta);
+        let mergedFlight = merge(existingFlight, flightDelta);
         console.log('flightDelta', flightDelta);
         console.log('existingFlight', existingFlight);
         console.log('mergedFlight', mergedFlight);
@@ -154,6 +156,7 @@ export class FlightChain extends Chaincode {
 
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
         mergedFlight.updaterId = iataCode;
+        mergedFlight.txId = stubHelper.getStub().getTxID();
 
         await stubHelper.putState(flightKey, mergedFlight);
         console.log('============= END : updateFlight ===========');
