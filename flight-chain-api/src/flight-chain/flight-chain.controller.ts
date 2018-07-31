@@ -55,6 +55,16 @@ export class FlightChainController {
     }
 
 
+    @ApiOperation({title: 'Get transaction info', description: 'Returns the details of a given transaction'})
+    @ApiImplicitParam({name: 'transactionId', type: 'string', required: true, description: 'Transaction Id returned after every flight creation or update.'})
+    @Get('/transaction/:transactionId')
+    @ApiResponse({ status: 200, description: 'The transaction info has been successfully returned.'})
+    @ApiResponse({ status: 404, description: 'Not transaction info matching the given transactionId has been found.'})
+    public async getTransactionInfo(@Param('transactionId') transactionId): Promise<AcrisFlight> {
+        console.log('FlightChainController.getTransactionInfo()');
+        return this.flightChainService.getTransactionInfo(transactionId);
+    }
+
 
     @ApiOperation({ title: 'Update an existing flight on the network' })
     @ApiResponse({

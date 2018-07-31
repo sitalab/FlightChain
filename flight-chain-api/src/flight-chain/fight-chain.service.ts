@@ -132,6 +132,26 @@ export class FlightChainService {
     }
 
 
+    public async getTransactionInfo(transactionId: string): Promise<AcrisFlight> {
+        let transactionInfo: any = await this.channel.queryTransaction(transactionId).catch((err) => {
+            console.error('error getting transaction id', err);
+            throw new HttpException(err, HttpStatus.BAD_REQUEST);
+        });
+
+        return transactionInfo;
+
+        // if (transactionInfo) {
+        //     console.error('transactionInfo', transactionInfo.transactionEnvelope.signature.toString());
+            // console.error('transactionInfo.header.channel_header', transactionInfo.transactionEnvelope.payload.header.channel_header);
+            // console.error('transactionInfo.header.signature_header', transactionInfo.transactionEnvelope.payload.header.signature_header);
+            // console.error('transactionInfo.payload.data.actions.header', transactionInfo.transactionEnvelope.payload.data.actions[0].header);
+            // console.error('transactionInfo.payload.data.actions.payload', transactionInfo.transactionEnvelope.payload.data.actions[0].payload);
+            // console.error('transactionInfo', transactionInfo.toString());
+        // }
+
+    }
+
+
     /**
      *
      * @param {Client.ChaincodeInvokeRequest} transactionProposalRequest
@@ -249,8 +269,11 @@ export class FlightChainService {
     }
 
     private async queryChainCodeState(request): Promise<AcrisFlight> {
-        // return  new Promise<any>((resolve, reject) => {
-        let query_responses = await this.channel.queryByChaincode(request).catch((err) => {
+
+
+
+
+        let query_responses: Buffer[] = await this.channel.queryByChaincode(request).catch((err) => {
             console.error('queryByChaincode', err);
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
