@@ -284,7 +284,7 @@ export class FlightChainService {
                 throw new HttpException(query_responses[0], HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
 
-                if (query_responses[0].toString().length === 0) {
+                if (query_responses[0].toString().length === 0 || query_responses[0].toString() == '[]') {
                     throw new HttpException(`No matching flight for flightKey`, HttpStatus.NOT_FOUND);
                 } else {
                     console.log('Response is ', query_responses[0].toString());
