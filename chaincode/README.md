@@ -2,19 +2,31 @@
 
 ## About
 This folder contains the smart contract chaincode that is deployed on the Hyperledger Fabric network.
+The code is written in typescript, and it is assumed you are comfotable using node & npm.
 
-The code is written in typescript.
+The typical lifecycle developing locally is to make modifications to the code in (src)[./src], test the code (`npm run test:w`), 
+and then use the `deployChainCode.sh` script to deploy the new version of your chaincode onto your local network.
+
+
+**Note** You cannot run the chaincode directly with node. Look at the **Deploying chaincode** section for info on 
+how to deploy your code so it is executable.
+
 
 ## Pre-requisets
 
+Install node (v8.9.x) and npm.  **Note** Node v9 doesn't currently work with Hyperledger Fabric 1.2
+
 Run `npm install` to install the node_modules.
 
-## Building / Testing chaincode.
+## Testing chaincode.
 
 Run `npm run test:w` to enter into watch mode testing the chaincode on each file edit.
 
 
 ## Deploying chaincode locally
+
+There is a demo local fabric network in [sita-basic-network](../sita-basic-network). This script will instantiate
+that network and deploy the chaincode onto it. 
 
 Run `./deployChainCode.sh -v 1.0 -n flightchain` to rebuild the network and redeploy the chaincode.
 

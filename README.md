@@ -8,6 +8,13 @@ This dApp is open to any airline & airport to integrate into. Airlines & airport
 and can query the network to get the complete flight status data (which includes authoritative data from airline, 
 origin airport and destination airport).
 
+## How do I copy this?
+
+- Look in [chaincode](./chaincode) to see the smart contract code, how it is tested and deployed.
+- Look in [flight-chain-api](./flight-chain-api) to see how the chain code is exposed via a REST API to users.
+- Look in [sita-basic-network](./sita-basic-network) to see a sample Fabric network config for deploying this smart contract locally.
+- Look in [flight-chain-ui](./flight-chain-ui) to see a sample user interface that queries the API to get flight chain data.
+
 
 ![alt text](docs/images/flightchain.jpg "Flight Chain Network")
 Figure 1 - illustration of original Flight Chain network. 
@@ -27,8 +34,8 @@ Figure 1 - illustration of original Flight Chain network.
 ## Running chaincode on local dev environment <a name="localdev"></a>
 
 This repo comes complete with a Fabric network configration. This will work, assuming that you have
-already checked out https://github.com/hyperledger/fabric-samples and have gone through the pre-requiset 
-steps for fabric-samples.
+already checked out [https://github.com/hyperledger/fabric-samples] and have gone through the prerequisite 
+steps for fabric-samples. **Note** make sure you get version 1.2 (or later). 
 
 ### Start network & deploy chaincode locally.
 
@@ -51,22 +58,24 @@ Figure 2 - high level architecture overview.
 
 This simplified three layer diagram shows:
  
- - The sandbox infrastructure at the bottom. This is the Hyperledger Fabric network (consisting of consensus nodes, 
-ordering services and membership services). This is the network manged by SITA. The smart contracts (chain code) gets
+ - The sandbox infrastructure at the bottom. <br/> This is the Hyperledger Fabric network (consisting of consensus nodes, 
+ordering services and membership services). This is the network manged by SITA. The smart contracts ([chaincode](./chaincode)) is
 deployed onto this, and this network maintains the ledger world state. In future iterations of the blockchain network, 
 the consensus nodes will be spread over different airlines/airport data centres.
 
- - The Flight Chain Fabric Client app is the middle layer. This layer exposes access to the Flight Chain smart contract
- as a set of REST APIs (to query & publish updates). 
+ - The Flight Chain Fabric Client app is the middle layer. <br/> This layer exposes access to the Flight Chain smart contract
+ as a set of REST APIs (see [flight-chain-api](./flight-chain-api)). There is one instance of the REST API per airline or airport. Each instance
+ stores the private key for the airline/airport, and all calls to the chain-code are identified with this key.
  
-- The top layer shows airport/airline operating databases which POST updates during the lifecycle of a flight into 
-the REST API.   
+- The airport/airline operating databases is the top layer. <br/> This layer POSTs updates during the lifecycle of a flight into 
+the REST API. It is assumed there is a secure connection from the top layer to the interface layer.
 
 To comment on this diagram, see the [source architecture document](https://docs.google.com/drawings/d/1Zq-vAdJJv_G257eTWgB1CtkCOL1dma3JcDOeYaw4O4Q/edit)
 
 
 ### REST APIs <a name="rest-apis"></a>
 
+The code for the REST APIs is in [flight-chain-api](flight-chain-api).
 
 #### 1. Add new flight
 

@@ -19,7 +19,7 @@ $ npm install
 ## Register admin/users
 
 For local testing, it is necessary to bootstrap the network with an admin user
-and some airline/airport users.
+and some airline/airport users. The certificates & pem file are stored in `bootstrap/hfc-key-store` by default
 
 > **NOTE** You must run this every time you rebuild your blockchain network.
 
@@ -47,20 +47,23 @@ node bootstrap/registerUser.js MIA
 
 ## Running the app
 
+When you start the app, you must specify via environment variables which port the instance of the REST API is listening 
+on and what airline or airport identity is related to this instance.
+
+There are some convenience scripts in package.json to set these environment variables.  
+
 ```bash
-# development
-$ npm run start
 
-# watch mode
-$ npm run start:dev
+# launch in watch mode for British Airways
+$ npm run start:ba
+# launch in watch mode for Miami Airport
+$ npm run start:mia
 
-# production mode
-npm run start:prod
 ```
 
 ## User Interface
 
-View the swagger docs for the API on http://localhost:3000/api.
+View the swagger docs for the API on `http://localhost:<LISTEN_PORT>/api.`
 
 
 ## API Security
@@ -68,7 +71,7 @@ View the swagger docs for the API on http://localhost:3000/api.
 TODO
 
 
-## Test
+## Tests
 
 ```bash
 # unit tests

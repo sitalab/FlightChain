@@ -16,7 +16,7 @@ export class FlightChainService {
     private member_user;
 
     // TODO - should channel name be env or API param, or other?
-    private username = 'LGA';
+    private username = process.env.IDENTITY;
     private channelName = 'channel-flight-chain';
     private peerEndpoints: string[] = ['grpc://localhost:7051'];
     private ordererEndpoint = 'grpc://localhost:7050';
@@ -55,7 +55,8 @@ export class FlightChainService {
             if (user_from_store && user_from_store.isEnrolled()) {
                 console.log('Successfully loaded ' + this.username + ' from persistence');
             } else {
-                throw new Error('Failed to get ' + this.username + '.... Did you run "node bootstrap/enrollAdmin.js && node bootstrap/registerUser.js""');
+                console.error(`Failed to get the identity ${this.username}.... Did you run "node bootstrap/enrollAdmin.js && node bootstrap/registerUser.js  ${this.username}"`);
+                process.exit(1);
             }
         })
 
