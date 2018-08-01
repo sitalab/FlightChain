@@ -41,7 +41,6 @@ export class FlightChain extends Chaincode {
             throw new Error('Incorrect number of arguments. Expecting FlightKey ex: 2018-07-22LHRBA0227');
         }
         let flightKey = args[0];
-
         return  await stubHelper.getStateAsObject(flightKey);
     }
 
@@ -60,14 +59,7 @@ export class FlightChain extends Chaincode {
         }
         let flightKey = args[0];
         console.log('- start getFlightHistory: %s\n', flightKey);
-
         return await stubHelper.getHistoryForKeyAsList(flightKey);
-
-        // let resultsIterator = await stubHelper.getHistoryForKey(flightKey);
-        // let method = thisClass['getAllResults'];
-        // let results = await method(resultsIterator, true);
-        //
-        // return Buffer.from(JSON.stringify(results));
     }
 
     /**
