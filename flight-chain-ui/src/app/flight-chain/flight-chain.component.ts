@@ -5,6 +5,7 @@ import {NGXLogger} from "ngx-logger";
 import {AcrisFlight} from "../acris-schema/AcrisFlight";
 import {HttpErrorResponse} from "@angular/common/http";
 import _ from "lodash";
+import {FlightChainHistory} from "../acris-schema/AcrisFlightHistoryFromBlockchain";
 
 @Component({
   selector: 'app-flight-chain',
@@ -13,8 +14,17 @@ import _ from "lodash";
 })
 export class FlightChainComponent implements OnInit {
 
+  /**
+   * This contains the current most up to date flight status
+   */
   flightLive = null;
+  /**
+   * This contains the history of all flight changes
+   */
   flightHistory = null;
+  /**
+   * NonNull if there was an error loading the flight data
+   */
   error = null;
   loadingFlight = false;
   flightKey = new FormControl('', [Validators.required, Validators.pattern(/^[0-9]{4}-[0-9]{2}-[0-9]{2}[A-Z]{3}[A-Z0-9]{2}[0-9]{4}/)]);
@@ -42,16 +52,16 @@ export class FlightChainComponent implements OnInit {
     if (this.flightKey.valid) {
       this.resetFlightSearch();
       this.loadingFlight = true;
-      console.log('xx')
+      console.log('xx');
       localStorage.setItem('flightChain.flightKey', this.flightKey.value);
       this.flightChainService.getFlightHistory(this.flightKey.value)
-        .subscribe((flights: any | HttpErrorResponse) => {
+        .subscribe((flights: FlightChainHistory[]) => {
           this._logger.info('getFlightResult: ', flights);
           if (!this.isAcrisFlight(flights[0])) {
             this.error = flights;
             this.flightHistory = null;
           } else {
-            this.flightHistory = this.processFlights(flights);
+            this.flightHistory = this.processFlightsHistory(flights);
             this.error = null;
           }
           this.loadingFlight = false;
@@ -87,27 +97,48 @@ export class FlightChainComponent implements OnInit {
   /**
    * Flight at index 0 is the oldest flight.
    *
+   * Each element in the flight history contains the full merged ACRIS flight status. For display purposes
+   * we want to show the original ACRIS flight data sent to blockchain, and then the deltas after that.
+   * Process the flight updates to identify the delta from two ACRIS array elements.
+   *
    * @param flights
    */
-  private processFlights(flights: any[]) {
+  private processFlightsHistory(flights: FlightChainHistory[]) {
 
-    this.flightLive = flights[flights.length-1];
-    let i=0;
+    this.flightLive = flights[flights.length - 1];
+    let i = 0;
     let deltas = [];
-    deltas.push(flights[0]);
 
-    for (i=1; i<flights.length; i++) {
+    /**
+     * Add the creation element to the start of the array.
+     */
+    let originalFlight = _.clone(flights[0]);
+    originalFlight.updaterId = originalFlight.value.updaterId;
+    deltas.push(originalFlight);
 
-      let original = flights[i-1];
+    /**
+     * Now process all other flights to just add the deltas to this array
+     */
+    for (i = 1; i < flights.length; i++) {
+
+      let original = flights[i - 1];
       let merged = flights[i];
 
       let deepDiff = this.difference(merged.value, original.value);
       let mergedCopy = _.clone(merged);
       mergedCopy.value = deepDiff;
+
+      /**
+       * Move the updaterId to the root of the object, and remove them from teh value (the ARCRIS data)
+       * to keep the display of deltas clean.
+       */
+      mergedCopy.updaterId = merged.value.updaterId;
+
+      mergedCopy.value.txId = undefined;
+      mergedCopy.value.updaterId = undefined;
       deltas.push(mergedCopy);
 
     }
-    //deltas.push(currentStatus);
     return deltas;
   }
 
@@ -120,87 +151,13 @@ export class FlightChainComponent implements OnInit {
    */
   private difference(object, base) {
     function changes(object, base) {
-      return _.transform(object, function(result, value, key) {
+      return _.transform(object, function (result, value, key) {
         if (!_.isEqual(value, base[key])) {
           result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
         }
       });
     }
+
     return changes(object, base);
   }
-
 }
-var deepDiffMapper = function() {
-  return {
-    VALUE_CREATED: 'created',
-    VALUE_UPDATED: 'updated',
-    VALUE_DELETED: 'deleted',
-    VALUE_UNCHANGED: 'unchanged',
-    map: function(obj1, obj2) {
-      if (this.isFunction(obj1) || this.isFunction(obj2)) {
-        throw 'Invalid argument. Function given, object expected.';
-      }
-      if (this.isValue(obj1) || this.isValue(obj2)) {
-        return {
-          type: this.compareValues(obj1, obj2),
-          data: (obj1 === undefined) ? obj2 : obj1
-        };
-      }
-
-      var diff = {};
-      for (var key in obj1) {
-        if (this.isFunction(obj1[key])) {
-          continue;
-        }
-
-        var value2 = undefined;
-        if ('undefined' != typeof(obj2[key])) {
-          value2 = obj2[key];
-        }
-
-        diff[key] = this.map(obj1[key], value2);
-      }
-      for (var key in obj2) {
-        if (this.isFunction(obj2[key]) || ('undefined' != typeof(diff[key]))) {
-          continue;
-        }
-
-        diff[key] = this.map(undefined, obj2[key]);
-      }
-
-      return diff;
-
-    },
-    compareValues: function(value1, value2) {
-      if (value1 === value2) {
-        return this.VALUE_UNCHANGED;
-      }
-      if (this.isDate(value1) && this.isDate(value2) && value1.getTime() === value2.getTime()) {
-        return this.VALUE_UNCHANGED;
-      }
-      if ('undefined' == typeof(value1)) {
-        return this.VALUE_CREATED;
-      }
-      if ('undefined' == typeof(value2)) {
-        return this.VALUE_DELETED;
-      }
-
-      return this.VALUE_UPDATED;
-    },
-    isFunction: function(obj) {
-      return {}.toString.apply(obj) === '[object Function]';
-    },
-    isArray: function(obj) {
-      return {}.toString.apply(obj) === '[object Array]';
-    },
-    isObject: function(obj) {
-      return {}.toString.apply(obj) === '[object Object]';
-    },
-    isDate: function(obj) {
-      return {}.toString.apply(obj) === '[object Date]';
-    },
-    isValue: function(obj) {
-      return !this.isObject(obj) && !this.isArray(obj);
-    }
-  }
-}();

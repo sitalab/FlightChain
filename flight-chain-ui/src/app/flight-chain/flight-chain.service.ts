@@ -4,6 +4,7 @@ import {AcrisFlight} from '../acris-schema/AcrisFlight';
 import {catchError, tap} from 'rxjs/operators';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {NGXLogger} from 'ngx-logger';
+import {FlightChainHistory} from "../acris-schema/AcrisFlightHistoryFromBlockchain";
 
 @Injectable({
   providedIn: 'root'
@@ -25,11 +26,18 @@ export class FlightChainService {
       );
   }
   /** GET history of updates for a flight from the server */
-  getFlightHistory(flightKey: String): Observable<any| HttpErrorResponse> {
-    return this.http.get<any>(this.flightURL + flightKey+'/history')
+  getFlightHistory(flightKey: String): Observable<FlightChainHistory[]| HttpErrorResponse> {
+    return this.http.get<FlightChainHistory[]>(this.flightURL + flightKey+'/history')
       .pipe(
         tap(flight => this._logger.debug('fetched flight history')),
-        catchError(this.handleError('getFlightHistory', null))
+        catchError(this.handleError('getFlightHistory', []))
+      );
+  }
+  getTransaction(transactionId: string) {
+    return this.http.get<any>(this.flightURL +'transaction/'+transactionId)
+      .pipe(
+        tap(flight => this._logger.debug('fetched transactionInfo')),
+        catchError(this.handleError('getTransaction', null))
       );
   }
 
@@ -52,6 +60,7 @@ export class FlightChainService {
       return of(error);
     };
   }
+
 
 
 }

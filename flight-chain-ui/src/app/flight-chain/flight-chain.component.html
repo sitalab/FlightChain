@@ -31,15 +31,21 @@
       <mat-card-content>
         <div fxLayout="row">
           <div fxLayout="column">
-            <p>Flight: <span *ngIf="flightLive.value.operatingAirline">{{flightLive.value.operatingAirline.name}} </span>{{flightLive.value.flightNumber.airlineCode}}
+            <p>Flight: <span
+              *ngIf="flightLive.value.operatingAirline">{{flightLive.value.operatingAirline.name}} </span>{{flightLive.value.flightNumber.airlineCode}}
               {{flightLive.value.flightNumber.trackNumber}}</p>
             <div class="from_to">
               {{flightLive.value.departureAirport}} to {{flightLive.value.arrivalAirport}}
-              (<span *ngIf="flightLive.value.flightStatus">{{flightLive.value.flightStatus}}</span><span *ngIf="!flightLive.value.flightStatus">Status unknown</span>)
+              (<span *ngIf="flightLive.value.flightStatus">{{flightLive.value.flightStatus}}</span><span
+              *ngIf="!flightLive.value.flightStatus">Status unknown</span>)
             </div>
-            <p>Last update from: {{flightLive.value.updaterId}}</p>
-            <p>When: {{ (flightLive.timestamp.low | amFromUnix) | amTimeAgo}}</p>
-            <p>TxId: {{ flightLive.tx_id}}</p>
+            <svg width="50" height="50" [identiconHash]="flightLive.value.updaterId">
+              Fallback text for browsers not supporting inline svg
+            </svg>
+            <p>Last update from: {{flightLive.value.updaterId}}, {{ (flightLive.timestamp.low | amFromUnix) | amTimeAgo}}</p>
+            <a routerLink="/transaction/{{flightLive.tx_id}}">
+              TxId: {{flightLive.tx_id}}
+            </a>
           </div>
           <p>
           <pre>
@@ -53,12 +59,18 @@
       <mat-card-title>
         <h3>History</h3>
       </mat-card-title>
-      <mat-card-content  *ngFor="let flight of flightHistory | reverse">
+      <mat-card-content *ngFor="let flight of flightHistory | reverse">
         <div fxLayout="row">
           <div fxLayout="column">
-          <p>Updater: {{flight.value.updaterId}}</p>
-          <p>When: {{ (flight.timestamp.low | amFromUnix) | amTimeAgo}}</p>
-            <p>TxId: {{ flight.tx_id}}</p>
+            <p>
+              <svg width="50" height="50" [identiconHash]="flight.updaterId">
+                {{flight.updaterId}}
+              </svg>
+            </p>
+            <p>Updater: {{flight.updaterId}},  {{ (flight.timestamp.low | amFromUnix) | amTimeAgo}}</p>
+            <a routerLink="/transaction/{{flight.tx_id}}">
+              TxId: {{flight.tx_id}}
+            </a>
           </div>
           <p>
           <pre>

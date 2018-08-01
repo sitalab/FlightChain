@@ -10,11 +10,15 @@ import {HttpClientModule} from "@angular/common/http";
 import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';
 import {MomentModule} from "angular2-moment";
 import {NgPipesModule} from "ngx-pipes";
+import {FlightChainTransactionComponent} from "./flight-chain-transaction/flight-chain-transaction.component";
+import {IdenticonHashDirective} from "./utils/identicon-hash.directive";
 
 @NgModule({
   declarations: [
     AppComponent,
-    FlightChainComponent
+    FlightChainComponent,
+    FlightChainTransactionComponent,
+    IdenticonHashDirective
   ],
 
   imports: [
