@@ -16,8 +16,8 @@ export class FlightChainService {
     private member_user;
 
     // TODO - should channel name be env or API param, or other?
-    private username = 'LGA';
-    private channelName = 'mychannel';
+    private username = process.env.IDENTITY;
+    private channelName = 'channel-flight-chain';
     private peerEndpoints: string[] = ['grpc://localhost:7051'];
     private ordererEndpoint = 'grpc://localhost:7050';
 
@@ -55,7 +55,8 @@ export class FlightChainService {
             if (user_from_store && user_from_store.isEnrolled()) {
                 console.log('Successfully loaded ' + this.username + ' from persistence');
             } else {
-                throw new Error('Failed to get ' + this.username + '.... Did you run "node bootstrap/enrollAdmin.js && node bootstrap/registerUser.js""');
+                console.error(`Failed to get the identity ${this.username}.... Did you run "node bootstrap/enrollAdmin.js && node bootstrap/registerUser.js  ${this.username}"`);
+                process.exit(1);
             }
         })
 
@@ -101,7 +102,7 @@ export class FlightChainService {
             chaincodeId: 'flightchain',
             fcn: 'createFlight',
             args: [JSON.stringify(flight)],
-            // chainId: 'mychannel',
+            // chainId: 'channel-flight-chain',
             txId: tx_id,
             // proposalResponses: null,
             // proposal: null
@@ -122,12 +123,32 @@ export class FlightChainService {
             chaincodeId: 'flightchain',
             fcn: 'updateFlight',
             args: [flightKey, JSON.stringify(flightDelta)],
-            chainId: 'mychannel',
+            chainId: 'channel-flight-chain',
             txId: tx_id,
             proposalResponses: null,
             proposal: null
         };
         return this.commitTransaction(request);
+
+    }
+
+
+    public async getTransactionInfo(transactionId: string): Promise<AcrisFlight> {
+        let transactionInfo: any = await this.channel.queryTransaction(transactionId).catch((err) => {
+            console.error('error getting transaction id', err);
+            throw new HttpException(err, HttpStatus.BAD_REQUEST);
+        });
+
+        return transactionInfo;
+
+        // if (transactionInfo) {
+        //     console.error('transactionInfo', transactionInfo.transactionEnvelope.signature.toString());
+            // console.error('transactionInfo.header.channel_header', transactionInfo.transactionEnvelope.payload.header.channel_header);
+            // console.error('transactionInfo.header.signature_header', transactionInfo.transactionEnvelope.payload.header.signature_header);
+            // console.error('transactionInfo.payload.data.actions.header', transactionInfo.transactionEnvelope.payload.data.actions[0].header);
+            // console.error('transactionInfo.payload.data.actions.payload', transactionInfo.transactionEnvelope.payload.data.actions[0].payload);
+            // console.error('transactionInfo', transactionInfo.toString());
+        // }
 
     }
 
@@ -249,8 +270,11 @@ export class FlightChainService {
     }
 
     private async queryChainCodeState(request): Promise<AcrisFlight> {
-        // return  new Promise<any>((resolve, reject) => {
-        let query_responses = await this.channel.queryByChaincode(request).catch((err) => {
+
+
+
+
+        let query_responses: Buffer[] = await this.channel.queryByChaincode(request).catch((err) => {
             console.error('queryByChaincode', err);
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
@@ -261,7 +285,7 @@ export class FlightChainService {
                 throw new HttpException(query_responses[0], HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
 
-                if (query_responses[0].toString().length === 0) {
+                if (query_responses[0].toString().length === 0 || query_responses[0].toString() == '[]') {
                     throw new HttpException(`No matching flight for flightKey`, HttpStatus.NOT_FOUND);
                 } else {
                     console.log('Response is ', query_responses[0].toString());

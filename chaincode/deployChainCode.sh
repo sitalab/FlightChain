@@ -90,14 +90,14 @@ NODE_SRC_PATH=/opt/src/node
 
 
 echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
 
 echo "INSTANTIATE ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer --logging-level debug chaincode instantiate -o orderer.example.com:7050 -C mychannel -n $CHAINCODENAME -l "$LANGUAGE" -v $CHAINCODEVERSION -c '{"Args":[""]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C channel-flight-chain -n $CHAINCODENAME -l "$LANGUAGE" -v $CHAINCODEVERSION -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
 sleep 10
 
 echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer chaincode invoke -o orderer.sita.aero:7050 -C channel-flight-chain -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
 
 echo ""
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
@@ -107,7 +107,7 @@ echo ""
 echo "some thing like"
 echo ""
 echo "CONTAINER ID        IMAGE                                                                                                         COMMAND                  CREATED              STATUS              PORTS                                            NAMES"
-echo "ecd4ab3eda24        dev-peer0.org1.example.com-${CHAINCODENAME}-${CHAINCODEVERSION}-df6caaaa992cb4c675c9741661b86300c088dccc170f39da8b64773a8b7b94e4   \"/bin/sh -c 'cd /usr…\"   About a minute ago   Up About a minute                                                    dev-peer0.org1.example.com-${CHAINCODENAME}-${CHAINCODEVERSION}"
+echo "ecd4ab3eda24        dev-peer0.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}-df6caaaa992cb4c675c9741661b86300c088dccc170f39da8b64773a8b7b94e4   \"/bin/sh -c 'cd /usr…\"   About a minute ago   Up About a minute                                                    dev-peer0.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}"
 echo ""
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 echo ""

@@ -14,7 +14,7 @@ by the chaincode/deployChainCode.sh script [in chaincode](../chaincode)
 
 Note that this basic configuration uses pre-generated certificates and
 key material, and also has predefined transactions to initialize a 
-channel named "mychannel".
+channel named "channel-flight-chain".
 
 To regenerate this material, simply run ``generate.sh``.
 
@@ -27,10 +27,10 @@ Check that all the images are running by running `docker ps`. You should see the
 ```
 KOS:sita-basic-network kosullivan$ docker ps
 CONTAINER ID        IMAGE                        COMMAND                  CREATED             STATUS              PORTS                                            NAMES
-1a2ab5774c07        hyperledger/fabric-peer      "peer node start"        11 seconds ago      Up 13 seconds       0.0.0.0:7051->7051/tcp, 0.0.0.0:7053->7053/tcp   peer0.org1.example.com
+1a2ab5774c07        hyperledger/fabric-peer      "peer node start"        11 seconds ago      Up 13 seconds       0.0.0.0:7051->7051/tcp, 0.0.0.0:7053->7053/tcp   peer0.sandbox.sita.aero
 57d6a896fbe5        hyperledger/fabric-couchdb   "tini -- /docker-ent…"   14 seconds ago      Up 14 seconds       4369/tcp, 9100/tcp, 0.0.0.0:5984->5984/tcp       couchdb
-823366705d09        hyperledger/fabric-ca        "sh -c 'fabric-ca-se…"   14 seconds ago      Up 15 seconds       0.0.0.0:7054->7054/tcp                           ca.example.com
-2fafca22605d        hyperledger/fabric-orderer   "orderer"                14 seconds ago      Up 15 seconds       0.0.0.0:7050->7050/tcp                           orderer.example.com
+823366705d09        hyperledger/fabric-ca        "sh -c 'fabric-ca-se…"   14 seconds ago      Up 15 seconds       0.0.0.0:7054->7054/tcp                           ca.sita.aero
+2fafca22605d        hyperledger/fabric-orderer   "orderer"                14 seconds ago      Up 15 seconds       0.0.0.0:7050->7050/tcp                           orderer.sita.aero
 f766711953a5        hyperledger/fabric-tools     "/bin/bash"              17 seconds ago      Up 19 seconds                                                        cli
 ```
 

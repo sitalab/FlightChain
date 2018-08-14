@@ -52,6 +52,7 @@ describe('Test FlightChain', () => {
         // These should be added on by the chaincode.
         flightObject.docType = 'flight';
         flightObject.updaterId = 'BA';
+        flightObject.txId = 'tx1';
         expect(Transform.bufferToObject(response.payload)).to.deep.eq(flightObject);
 
     });
@@ -79,6 +80,30 @@ describe('Test FlightChain', () => {
 
 
     });
+
+
+    it("Should correctly MERGE a flight", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        let NEW_ESTIMATED_ARRIVAL = '2018-07-31T08:04:00-06:00';
+        let flightObject = createFlight('2017-04-05', 'BA', '1481', 'MIA', 'SDQ');
+        let response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(response.status).to.eql(200)
+
+        let responseUpdate = await stub.mockInvoke("tx1", ['updateFlight', '2017-04-05MIABA1481', JSON.stringify({ arrival:{estimated: NEW_ESTIMATED_ARRIVAL}})]);
+        expect(responseUpdate.status).to.eql(200)
+
+        response = await stub.mockInvoke("tx4", ['getFlight', '2017-04-05MIABA1481']);
+
+        // These should be added on by the chaincode.
+        flightObject.docType = 'flight';
+        flightObject.updaterId = 'BA';
+        flightObject.txId = 'tx1';
+        flightObject.arrival.estimated =NEW_ESTIMATED_ARRIVAL;
+        expect(Transform.bufferToObject(response.payload)).to.deep.eq(flightObject);
+
+    });
+
 
     /*
         it("Should be able to init and query all cars", async () => {
@@ -326,10 +351,10 @@ function createFlight(originDate: string, operatingAirline: string, flightNumber
         '  },\n' +
         '  "arrival": {\n' +
         '    "scheduled": "2017-04-05T14:38:00-04:00",\n' +
-        '    "terminal": "",\n' +
-        '    "gate": "",\n' +
+        '    "terminal": "S",\n' +
+        '    "gate": "A20",\n' +
         '    "baggageClaim": {\n' +
-        '      "carousel": ""\n' +
+        '      "carousel": "4"\n' +
         '    }\n' +
         '  },\n' +
         '  "flightStatus": "Scheduled"\n' +

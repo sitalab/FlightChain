@@ -6,11 +6,15 @@
 #
 export PATH=$GOPATH/src/github.com/hyperledger/fabric/build/bin:${PWD}/../bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
-CHANNEL_NAME=mychannel
+
+# Channel name contain only lowercase alpha numerics, dots and dashes.
+CHANNEL_NAME=channel-flight-chain
 
 # remove previous crypto material and config transactions
 rm -fr config/*
 rm -fr crypto-config/*
+mkdir config
+mkdir crypto-config
 
 # generate crypto material
 cryptogen generate --config=./crypto-config.yaml
@@ -34,9 +38,9 @@ if [ "$?" -ne 0 ]; then
 fi
 
 # generate anchor peer transaction
-configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./config/Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP
+configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./config/SITAMSPanchors.tx -channelID $CHANNEL_NAME -asOrg SITAMSP
 if [ "$?" -ne 0 ]; then
-  echo "Failed to generate anchor peer update for Org1MSP..."
+  echo "Failed to generate anchor peer update for SITAMSP..."
   exit 1
 fi
 
@@ -59,7 +63,7 @@ ARCH=$(uname -s | grep Darwin)
 cp docker-compose-template.yml docker-compose.yml
 
 CURRENT_DIR=$PWD
-cd crypto-config/peerOrganizations/org1.example.com/ca/
+cd crypto-config/peerOrganizations/sandbox.sita.aero/ca/
 export PRIV_KEY=$(ls *_sk)
 cd "$CURRENT_DIR"
 
