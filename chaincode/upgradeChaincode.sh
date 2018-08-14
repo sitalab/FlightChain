@@ -63,7 +63,7 @@ if [[ -n "${CHANNEL/[ ]*\n/}" ]]
 then
 	echo CHANNEL	= "${CHANNEL}"
 else
-	echo "you must specify the channel"
+	echo "you must specify the channel (e.g. $0 -c channel-flight-chain)"
 	exit 1;
 fi
 
@@ -72,9 +72,9 @@ NODE_SRC_PATH=/opt/src/node
 
 # install chaincode
 echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
 
 # upgrade chaincode
 echo "UPGRADE ${CHAINCODENAME} to version ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp"   cli peer chaincode upgrade --logging-level debug -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -C $CHANNEL -o orderer.example.com:7050 -c '{"function":"initLedger","Args":[""]}'  -p "$NODE_SRC_PATH" -l "$LANGUAGE"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp"   cli peer chaincode upgrade --logging-level debug -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -C $CHANNEL -o orderer.sita.aero:7050 -c '{"function":"initLedger","Args":[""]}'  -p "$NODE_SRC_PATH" -l "$LANGUAGE"
 
