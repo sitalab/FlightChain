@@ -1,6 +1,7 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {AcrisFlight} from '../acris-schema/AcrisFlight';
 import {ChaincodeInvokeRequest, ChaincodeQueryRequest, TransactionRequest} from 'fabric-client';
+import Client = require('fabric-client');
 
 const Fabric_Client = require('fabric-client');
 const path = require('path');
@@ -12,7 +13,7 @@ export class FlightChainService {
     private readonly flights: AcrisFlight[] = [];
 
     private fabric_client = null;
-    private channel = null;
+    private channel: Client.Channel = null;
     private member_user;
 
     // TODO - should channel name be env or API param, or other?
@@ -20,37 +21,40 @@ export class FlightChainService {
     private channelName = 'channel-flight-chain';
     private peerEndpoints: string[] = ['grpc://localhost:7051'];
     private ordererEndpoint = 'grpc://localhost:7050';
+    private eventHubEndpoint = 'grpc://localhost:7053';
 
     constructor() {
+        this.fabric_client = this.initFabricClient();
+        this.channel = this.createChannel(this.channelName, this.peerEndpoints, this.ordererEndpoint);
+    }
 
-        this.fabric_client = new Fabric_Client();
-        // TODO - should channel name be env or API param?
-        this.channel = this.fabric_client.newChannel(this.channelName);
-        // TODO - change Peers & Orderers to env variable
-        this.peerEndpoints.forEach(peer => {
-            console.log('Adding peer endpoing ' + peer);
-            this.channel.addPeer(this.fabric_client.newPeer(peer));
-        });
-        this.channel.addOrderer(this.fabric_client.newOrderer(this.ordererEndpoint));
-
+    /**
+     * Create a fabric client and load the local user certificates for it.
+     *
+     * TODO - what is the best way to create, send, store certificates in future ?
+     *
+     */
+    private initFabricClient() {
         const store_path = path.join('./bootstrap/', 'hfc-key-store');
         console.log('Store path:' + store_path);
 
+        const fabric_client = new Fabric_Client();
+
         // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
         Fabric_Client.newDefaultKeyValueStore({
-            path: store_path
+            path: store_path,
         }).then((state_store) => {
             // assign the store to the fabric client
-            this.fabric_client.setStateStore(state_store);
+            fabric_client.setStateStore(state_store);
             const crypto_suite = Fabric_Client.newCryptoSuite();
             // use the same location for the state store (where the users' certificate are kept)
             // and the crypto store (where the users' keys are kept)
             const crypto_store = Fabric_Client.newCryptoKeyStore({path: store_path});
             crypto_suite.setCryptoKeyStore(crypto_store);
-            this.fabric_client.setCryptoSuite(crypto_suite);
+            fabric_client.setCryptoSuite(crypto_suite);
 
             // get the enrolled user from persistence, this user will sign all requests
-            return this.fabric_client.getUserContext(this.username, true);
+            return fabric_client.getUserContext(this.username, true);
         }).then((user_from_store) => {
             if (user_from_store && user_from_store.isEnrolled()) {
                 console.log('Successfully loaded ' + this.username + ' from persistence');
@@ -59,23 +63,60 @@ export class FlightChainService {
                 process.exit(1);
             }
         });
+
+        return fabric_client;
     }
 
-    public async findOne(flightKey: string): Promise<AcrisFlight> {
+    /**
+     * Create the channel on this API.
+     *
+     * TODO - should channel name be env or API param?
+     * TODO - change Peers & Orderers to env variable
+     *
+     * @param channelName
+     * @param peerEndpoints
+     * @param ordererEndpoint
+     */
+    private createChannel(channelName: string, peerEndpoints: string[], ordererEndpoint: string): Client.Channel {
+        console.log(`Creating new channel '${channelName}'...`);
+        const channel: Client.Channel = this.fabric_client.newChannel(channelName);
 
-        console.log('FlightChainService.findOne()', flightKey);
+        peerEndpoints.forEach(peer => {
+            console.log(`Adding peer endpoint '${peer}' to this channel...`);
+            channel.addPeer(this.fabric_client.newPeer(peer));
+        });
+        console.log(`Adding orderer '${ordererEndpoint}' to this channel...`);
+        channel.addOrderer(this.fabric_client.newOrderer(ordererEndpoint));
+        return channel;
+    }
+
+    /**
+     * Find the flight matching the given flight key.
+     *
+     * @param flightKey
+     */
+    public async findOneFlight(flightKey: string): Promise<AcrisFlight> {
+
+        console.log(`FlightChainService.findOneFlight('${flightKey}')` );
         const request = {
             // targets : --- letting this default to the peers assigned to the channel
             chaincodeId: 'flightchain',
             fcn: 'getFlight',
-            args: [flightKey]
+            args: [flightKey],
         };
 
         return this.queryChainCodeState(request);
     }
 
+    /**
+     * Find the flight history for the given flight key. The history is the list of all
+     * past changes to the dat.
+     *
+     * @param flightKey
+     */
     public async findFlightHistory(flightKey: any): Promise<AcrisFlight> {
-        console.log('FlightChainService.findFlightHistory()', flightKey);
+        console.log(`FlightChainService.findFlightHistory('${flightKey}')` );
+
         const request: ChaincodeInvokeRequest = {
             // targets : --- letting this default to the peers assigned to the channel
             chaincodeId: 'flightchain',
@@ -87,13 +128,16 @@ export class FlightChainService {
 
     }
 
-
+    /**
+     * Create a new flight on the blockchain.
+     *
+     * @param flight
+     */
     public async createFlight(flight: AcrisFlight): Promise<any> {
         console.log('FlightChainService.createFlight()');
 
         // get a transaction id object based on the current user assigned to fabric client
         const tx_id = this.fabric_client.newTransactionID();
-        console.log('Assigning transaction_id: ', tx_id._transaction_id);
 
         // must send the proposal to endorsing peers
         const request: ChaincodeInvokeRequest = {
@@ -109,8 +153,14 @@ export class FlightChainService {
         return this.commitTransaction(request);
     }
 
+    /**
+     * Update an existing flight on the blockchain.
+     *
+     * @param flightKey
+     * @param flightDelta
+     */
     public async updateFlight(flightKey: string, flightDelta: AcrisFlight): Promise<AcrisFlight> {
-        console.log('FlightChainService.updateFlight()');
+        console.log(`FlightChainService.updateFlight(${flightKey})`);
 
         // get a transaction id object based on the current user assigned to fabric client
         const tx_id = this.fabric_client.newTransactionID();
@@ -125,32 +175,26 @@ export class FlightChainService {
             chainId: 'channel-flight-chain',
             txId: tx_id,
             proposalResponses: null,
-            proposal: null
+            proposal: null,
         };
         return this.commitTransaction(request);
 
     }
 
-
+    /**
+     * Get the transaction details for the given transaction id.
+     *
+     * @param transactionId
+     */
     public async getTransactionInfo(transactionId: string): Promise<AcrisFlight> {
+        console.log(`FlightChainService.getTransactionInfo(${transactionId})`);
+
         const transactionInfo: any = await this.channel.queryTransaction(transactionId).catch((err) => {
             console.error('error getting transaction id', err);
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
-
         return transactionInfo;
-
-        // if (transactionInfo) {
-        //     console.error('transactionInfo', transactionInfo.transactionEnvelope.signature.toString());
-            // console.error('transactionInfo.header.channel_header', transactionInfo.transactionEnvelope.payload.header.channel_header);
-            // console.error('transactionInfo.header.signature_header', transactionInfo.transactionEnvelope.payload.header.signature_header);
-            // console.error('transactionInfo.payload.data.actions.header', transactionInfo.transactionEnvelope.payload.data.actions[0].header);
-            // console.error('transactionInfo.payload.data.actions.payload', transactionInfo.transactionEnvelope.payload.data.actions[0].payload);
-            // console.error('transactionInfo', transactionInfo.toString());
-        // }
-
     }
-
 
     /**
      *
@@ -159,19 +203,26 @@ export class FlightChainService {
      */
     private async commitTransaction(transactionProposalRequest: ChaincodeInvokeRequest): Promise<any> {
 
-
+        /**
+         * Send the transaction to the consensus nodes and wait for response.
+         */
+        const sendTransactionProposalTimingLabel = 'sendTransactionProposal-' + transactionProposalRequest.txId.getTransactionID();
+        console.time(sendTransactionProposalTimingLabel);
         const sendTransactionProposalResults = await this.channel.sendTransactionProposal(transactionProposalRequest).catch((err) => {
             console.error('sendTransactionProposal', err);
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
+        console.timeEnd(sendTransactionProposalTimingLabel);
 
+        /**
+         * Check that we have the appropriate number of proposal responses
+         */
         const proposalResponses = sendTransactionProposalResults[0];
         const proposal = sendTransactionProposalResults[1];
         let isProposalGood = false;
         if (proposalResponses && proposalResponses[0].response &&
             proposalResponses[0].response.status === 200) {
             isProposalGood = true;
-            console.log('Transaction proposal was good');
         } else {
             let msg = null;
             if (!proposalResponses[0].response.message) {
@@ -187,11 +238,9 @@ export class FlightChainService {
             // return new Promise<any>((resolve, reject) => { reject(msg); });
         }
         if (!isProposalGood) {
-            let msg = 'Failed to send Proposal or receive valid response. Response null or status is not 200. exiting...';
+            const msg = 'Failed to send Proposal or receive valid response. Response null or status is not 200. exiting...';
             console.error(msg);
-            // throw new Error(msg)
             throw new HttpException(msg, HttpStatus.BAD_REQUEST);
-            // return new Promise<any>((resolve, reject) => { reject(msg); });
         }
 
         console.log(util.format(
@@ -201,29 +250,35 @@ export class FlightChainService {
         const transactionRequest: TransactionRequest = {
             proposalResponses: proposalResponses,
             proposal: proposal,
-        }
+        };
 
         // set the transaction listener and set a timeout of 30 sec
         // if the transaction did not get committed within the timeout period,
         // report a TIMEOUT status
-        const transaction_id_string = transactionProposalRequest.txId.getTransactionID(); // Get the transaction ID string to be used by the event processing
+        // Get the transaction ID string to be used by the event processing
+        const transaction_id_string = transactionProposalRequest.txId.getTransactionID();
 
+        const sendTransactionTimingLabel = 'sendTransaction-' + transactionProposalRequest.txId.getTransactionID();
+        console.time(sendTransactionTimingLabel);
         const sendTransactionResponse = await this.channel.sendTransaction(transactionRequest).catch((err) => {
             console.log(err);
             throw new HttpException(err, HttpStatus.BAD_REQUEST);
         });
+        console.timeEnd(sendTransactionTimingLabel);
+
         console.log('sendTransactionResponse', sendTransactionResponse);
         if (sendTransactionResponse.status !== 'SUCCESS') {
             console.log('sendTransactionResponse failed');
             throw new HttpException('sendTransactionResponse failed', HttpStatus.BAD_REQUEST);
-
         }
 
+        return sendTransactionResponse;
 
+/*
         // get an eventhub once the fabric client has a user assigned. The user
         // is required bacause the event registration must be signed
         const event_hub = this.fabric_client.newEventHub();
-        event_hub.setPeerAddr('grpc://localhost:7053');
+        event_hub.setPeerAddr(this.eventHubEndpoint);
 
         // using resolve the promise so that result status may be processed
         // under the then clause rather than having the catch clause process
@@ -233,10 +288,17 @@ export class FlightChainService {
                 event_hub.disconnect();
                 reject(new HttpException('Trnasaction did not complete within 3 seconds', HttpStatus.REQUEST_TIMEOUT));
             }, 3000);
-            console.log('event_hub.connect');
+            const eventHubConnectimingLabel = 'eventHubConnect-' + transactionProposalRequest.txId.getTransactionID();
+            console.time(eventHubConnectimingLabel);
             event_hub.connect();
-            console.log('event_hub.registerTxEvent');
+            console.timeEnd(eventHubConnectimingLabel);
+
+            const eventHubRegisterTxEventtimingLabel = 'eventHubRegisterTxEvent-' + transactionProposalRequest.txId.getTransactionID();
+            console.time(eventHubRegisterTxEventtimingLabel);
             event_hub.registerTxEvent(transaction_id_string, (tx, code) => {
+
+                console.timeEnd(eventHubRegisterTxEventtimingLabel);
+
                 // this is the callback for transaction event status
                 // first some clean up of event listener
                 clearTimeout(handle);
@@ -244,7 +306,7 @@ export class FlightChainService {
                 event_hub.disconnect();
 
                 // now let the application know what happened
-                let return_status: any = {event_status: code, tx_id: transaction_id_string};
+                const return_status: any = {event_status: code, tx_id: transaction_id_string};
                 if (code !== 'VALID') {
                     console.error('The transaction was invalid, code = ' + code);
                     reject(new HttpException('Problem with the tranaction, event status ::' + code, HttpStatus.INTERNAL_SERVER_ERROR));
@@ -262,12 +324,18 @@ export class FlightChainService {
         console.log('event_hubResponse', event_hubResponse);
 
         if (event_hubResponse.event_status !== 'VALID') {
-            throw new HttpException(event_hubResponse, HttpStatus.BAD_REQUEST)
+            throw new HttpException(event_hubResponse, HttpStatus.BAD_REQUEST);
         }
 
         return event_hubResponse;
+*/
     }
 
+    /**
+     * Read the state value from the blockchain.
+     *
+     * @param request
+     */
     private async queryChainCodeState(request: ChaincodeQueryRequest): Promise<AcrisFlight> {
 
         const query_responses: Buffer[] = await this.channel.queryByChaincode(request).catch((err) => {
@@ -281,10 +349,10 @@ export class FlightChainService {
                 throw new HttpException(query_responses[0], HttpStatus.INTERNAL_SERVER_ERROR);
             } else {
 
-                if (query_responses[0].toString().length === 0 || query_responses[0].toString() == '[]') {
+                if (query_responses[0].toString().length === 0 || query_responses[0].toString() === '[]') {
                     throw new HttpException(`No matching flight for flightKey`, HttpStatus.NOT_FOUND);
                 } else {
-                    console.log('Response is ', query_responses[0].toString());
+                    // console.log('Response is ', query_responses[0].toString());
                 }
             }
         } else {

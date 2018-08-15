@@ -16,7 +16,7 @@ export class FlightChainController {
     @ApiResponse({ status: 404, description: 'Not flight matching the given flightKey has been found.'})
     public async getOneFlight(@Param('flightKey') flightKey): Promise<AcrisFlight> {
         console.log('FlightChainController.getOneFlight()');
-        return this.flightChainService.findOne(flightKey);
+        return this.flightChainService.findOneFlight(flightKey);
         //res.status(HttpStatus.OK).json(flight);
     }
 
