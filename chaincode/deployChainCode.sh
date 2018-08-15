@@ -23,6 +23,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -c | --channel)
+	    CHANNEL="$2"
+	    shift
+	    shift
+	    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -53,6 +58,15 @@ then
 else
     echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain)"
     exit 1;
+fi
+
+# check for channel
+if [[ -n "${CHANNEL/[ ]*\n/}" ]]
+then
+	echo CHANNEL    = "${CHANNEL}"
+else
+	echo "you must specify the channel (e.g. $0 -c channel-flight-chain)"
+	exit 1;
 fi
 
 if [ -d "node_modules" ]; then
