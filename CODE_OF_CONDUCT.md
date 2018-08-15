@@ -106,6 +106,7 @@ is the set of all available means of collaboration, including, but not limited t
 
 To report incidents or to appeal reports of incidents, send email to Kevin O'Sullivan (kevin.osullivan@sita.aero) or Sherry Stein (sherry.stein@sita.aero). Please include any available relevant information, including links to any publicly accessible material relating to the matter. Every effort will be taken to ensure a safe and collegial environment in which to collaborate on matters relating to the Project. In order to protect the community, the Project reserves the right to take appropriate action, potentially including the removal of an individual from any and all participation in the project. The Project will work towards an equitable resolution in the event of a misunderstanding.
 
+
 #### Credits
 
 This code is based on the [Hyperledger Code of Conduct](https://wiki.hyperledger.org/community/hyperledger-project-code-of-conduct), 
