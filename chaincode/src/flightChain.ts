@@ -25,6 +25,20 @@ export class FlightChain extends Chaincode {
      */
     async initLedger(stubHelper: StubHelper, args: string[]) {
         console.log('============= START : initLedger ===========');
+        await stubHelper.putState('version', 'MyVersion');
+
+    }
+
+    /**
+     * Return a single flight, as identified by the flight key.
+     *
+     * @param stubHelper
+     * @param args
+     * @returns {Promise<any>}
+     */
+    async version(stubHelper: StubHelper, args: string[]): Promise<any> {
+        console.log('============= START : version ===========');
+        return  await stubHelper.getStateAsObject('version');
     }
 
     /**

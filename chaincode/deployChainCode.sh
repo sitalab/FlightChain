@@ -24,7 +24,7 @@ case $key in
     shift # past value
     ;;
     -c | --channel)
-	    CHANNEL="$2"
+	    CHANNEL_NAME="$2"
 	    shift
 	    shift
 	    ;;
@@ -48,7 +48,7 @@ if [[ -n "${CHAINCODEVERSION/[ ]*\n/}" ]]
 then
     echo CHAINCODEVERSION  = "${CHAINCODEVERSION}"
 else
-    echo "you must specify the chain code version number (e.g. $0 -v 1.2 -n flightchain)"
+    echo "you must specify the chain code version number (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
     exit 1;
 fi
 
@@ -56,16 +56,16 @@ if [[ -n "${CHAINCODENAME/[ ]*\n/}" ]]
 then
     echo CHAINCODENAME     = "${CHAINCODENAME}"
 else
-    echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain)"
+    echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
     exit 1;
 fi
 
 # check for channel
-if [[ -n "${CHANNEL/[ ]*\n/}" ]]
+if [[ -n "${CHANNEL_NAME/[ ]*\n/}" ]]
 then
-	echo CHANNEL    = "${CHANNEL}"
+	echo CHANNEL_NAME    = "${CHANNEL_NAME}"
 else
-	echo "you must specify the channel (e.g. $0 -c channel-flight-chain)"
+	echo "you must specify the channel (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
 	exit 1;
 fi
 
@@ -103,25 +103,33 @@ LANGUAGE="node"
 NODE_SRC_PATH=/opt/src/node
 
 
-echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
+echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION} on peer1.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer1.sandbox.sita.aero:7051" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
 
-echo "INSTANTIATE ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C channel-flight-chain -n $CHAINCODENAME -l "$LANGUAGE" -v $CHAINCODEVERSION -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
+echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION} on peer0.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer0.sandbox.sita.aero:7051" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
+
+echo "INSTANTIATE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME}"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -l "$LANGUAGE" -v $CHAINCODEVERSION -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
 sleep 10
 
-echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}"
-docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer chaincode invoke -o orderer.sita.aero:7050 -C channel-flight-chain -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer0.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer0.sandbox.sita.aero:7051" cli peer chaincode invoke -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+
+echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer1.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer1.sandbox.sita.aero:7051" cli peer chaincode invoke -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+
 
 echo ""
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 echo ""
-echo "Your chaincode should now be deployed, and you should see another docker image running with your basic local network"
+echo "Your chaincode should now be deployed, and you should see another two docker images running with your basic local network"
 echo ""
 echo "some thing like"
 echo ""
 echo "CONTAINER ID        IMAGE                                                                                                         COMMAND                  CREATED              STATUS              PORTS                                            NAMES"
 echo "ecd4ab3eda24        dev-peer0.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}-df6caaaa992cb4c675c9741661b86300c088dccc170f39da8b64773a8b7b94e4   \"/bin/sh -c 'cd /usr…\"   About a minute ago   Up About a minute                                                    dev-peer0.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}"
+echo "da24ab3e4ecd        dev-peer1.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}-df6caaaa992cb4c675c9741661b86300c088dccc170f39da8b64773a8b7b94e4   \"/bin/sh -c 'cd /usr…\"   About a minute ago   Up About a minute                                                    dev-peer1.sandbox.sita.aero-${CHAINCODENAME}-${CHAINCODEVERSION}"
 echo ""
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 echo ""

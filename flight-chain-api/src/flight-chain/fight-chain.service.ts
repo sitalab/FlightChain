@@ -1,6 +1,6 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {AcrisFlight} from '../acris-schema/AcrisFlight';
-import {ChaincodeInvokeRequest, ChaincodeQueryRequest, TransactionRequest} from 'fabric-client';
+import {ChaincodeInvokeRequest, ChaincodeQueryRequest, ProposalResponseObject, TransactionRequest} from 'fabric-client';
 import Client = require('fabric-client');
 
 const Fabric_Client = require('fabric-client');
@@ -19,7 +19,7 @@ export class FlightChainService {
     // TODO - should channel name be env or API param, or other?
     private username = process.env.IDENTITY;
     private channelName = 'channel-flight-chain';
-    private peerEndpoints: string[] = ['grpc://localhost:7051'];
+    private peerEndpoints: string[] = ['grpc://localhost:7051', 'grpc://localhost:8051'];
     private ordererEndpoint = 'grpc://localhost:7050';
     private eventHubEndpoint = 'grpc://localhost:7053';
 
@@ -97,7 +97,7 @@ export class FlightChainService {
      */
     public async findOneFlight(flightKey: string): Promise<AcrisFlight> {
 
-        console.log(`FlightChainService.findOneFlight('${flightKey}')` );
+        console.log(`FlightChainService.findOneFlight('${flightKey}')`);
         const request = {
             // targets : --- letting this default to the peers assigned to the channel
             chaincodeId: 'flightchain',
@@ -115,7 +115,7 @@ export class FlightChainService {
      * @param flightKey
      */
     public async findFlightHistory(flightKey: any): Promise<AcrisFlight> {
-        console.log(`FlightChainService.findFlightHistory('${flightKey}')` );
+        console.log(`FlightChainService.findFlightHistory('${flightKey}')`);
 
         const request: ChaincodeInvokeRequest = {
             // targets : --- letting this default to the peers assigned to the channel
@@ -208,18 +208,27 @@ export class FlightChainService {
          */
         const sendTransactionProposalTimingLabel = 'sendTransactionProposal-' + transactionProposalRequest.txId.getTransactionID();
         console.time(sendTransactionProposalTimingLabel);
-        const sendTransactionProposalResults = await this.channel.sendTransactionProposal(transactionProposalRequest).catch((err) => {
-            console.error('sendTransactionProposal', err);
-            throw new HttpException(err, HttpStatus.BAD_REQUEST);
-        });
+        const sendTransactionProposalResults: ProposalResponseObject =
+            await this.channel.sendTransactionProposal(transactionProposalRequest).catch((err) => {
+                console.error('sendTransactionProposal', err);
+                throw new HttpException(err, HttpStatus.BAD_REQUEST);
+            });
         console.timeEnd(sendTransactionProposalTimingLabel);
 
         /**
          * Check that we have the appropriate number of proposal responses
          */
-        const proposalResponses = sendTransactionProposalResults[0];
-        const proposal = sendTransactionProposalResults[1];
+        // console.log('sendTransactionProposalResults', sendTransactionProposalResults);
+
+        const proposalResponses: Array<Client.ProposalResponse> = sendTransactionProposalResults[0];
+        const proposal: Client.Proposal = sendTransactionProposalResults[1];
         let isProposalGood = false;
+
+        console.log(`got ${proposalResponses.length} proposal results`);
+        proposalResponses.forEach((response: Client.ProposalResponse) => {
+            console.log(response.response);
+        });
+
         if (proposalResponses && proposalResponses[0].response &&
             proposalResponses[0].response.status === 200) {
             isProposalGood = true;
@@ -272,9 +281,6 @@ export class FlightChainService {
             throw new HttpException('sendTransactionResponse failed', HttpStatus.BAD_REQUEST);
         }
 
-        return sendTransactionResponse;
-
-/*
         // get an eventhub once the fabric client has a user assigned. The user
         // is required bacause the event registration must be signed
         const event_hub = this.fabric_client.newEventHub();
@@ -328,7 +334,7 @@ export class FlightChainService {
         }
 
         return event_hubResponse;
-*/
+
     }
 
     /**
