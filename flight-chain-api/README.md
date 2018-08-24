@@ -21,27 +21,19 @@ $ npm install
 For local testing, it is necessary to bootstrap the network with an admin user
 and some airline/airport users. The certificates & pem file are stored in `bootstrap/hfc-key-store` by default
 
-> **NOTE** You must run this every time you rebuild your blockchain network.
+> **NOTE** You must run this script every time you rebuild your blockchain network.
 
-First of all, purge all existing keys created from a previous run.
+`./setupUsers.sh` - this script will create an admin users, and register users for BA, MIA, GVA & LHR.
 
-`rm -rf bootstrap/hfc-key-store`
 
-`Then you have to enroll an admin user onto the system:
 
-`node bootstrap/enrollAdmin.js`
-
-Then you need to register users. 
-
-`node bootstrap/registerUser.js <airline/airport code>`
-
+In addition, you can register other airlines/airports.
 
 e.g. this will register a British Airways user and a Miami Airport user
 
 ```
 node bootstrap/registerUser.js BA
 node bootstrap/registerUser.js MIA
-
 ```
 
 

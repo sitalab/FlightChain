@@ -9,6 +9,7 @@ export FABRIC_CFG_PATH=${PWD}
 
 # Channel name contain only lowercase alpha numerics, dots and dashes.
 CHANNEL_NAME=channel-flight-chain
+CHANNEL_NAME_MIA=channel-flight-chain-mia
 
 # remove previous crypto material and config transactions
 rm -fr config/*
@@ -31,7 +32,13 @@ if [ "$?" -ne 0 ]; then
 fi
 
 # generate channel configuration transaction
-configtxgen -profile OneOrgChannel -outputCreateChannelTx ./config/channel.tx -channelID $CHANNEL_NAME
+configtxgen -profile OneOrgChannel -outputCreateChannelTx ./config/$CHANNEL_NAME.tx -channelID $CHANNEL_NAME
+if [ "$?" -ne 0 ]; then
+  echo "Failed to generate channel configuration transaction..."
+  exit 1
+fi
+# generate channel configuration transaction
+configtxgen -profile OneOrgChannel -outputCreateChannelTx ./config/$CHANNEL_NAME_MIA.tx -channelID $CHANNEL_NAME_MIA
 if [ "$?" -ne 0 ]; then
   echo "Failed to generate channel configuration transaction..."
   exit 1
@@ -39,6 +46,12 @@ fi
 
 # generate anchor peer transaction
 configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./config/SITAMSPanchors.tx -channelID $CHANNEL_NAME -asOrg SITAMSP
+if [ "$?" -ne 0 ]; then
+  echo "Failed to generate anchor peer update for SITAMSP..."
+  exit 1
+fi
+# generate anchor peer transaction
+configtxgen -profile OneOrgChannel -outputAnchorPeersUpdate ./config/SITAMSPanchors.tx -channelID $CHANNEL_NAME_MIA -asOrg SITAMSP
 if [ "$?" -ne 0 ]; then
   echo "Failed to generate anchor peer update for SITAMSP..."
   exit 1

@@ -1,4 +1,3 @@
-import {ClientIdentity} from 'fabric-shim';
 import {AcrisFlight} from './acris-schema/AcrisFlight';
 
 export class FlightChainLogic {
@@ -13,7 +12,7 @@ export class FlightChainLogic {
         let flightNum = flight.flightNumber.trackNumber;
         while (flightNum.length < 4)
             flightNum = '0' + flightNum;
-        let flightKey = flight.originDate + flight.departureAirport + flight.operatingAirline.iataCode + flightNum;
+        const flightKey: string = flight.originDate + flight.departureAirport + flight.operatingAirline.iataCode + flightNum;
         console.log('generateUniqueKey: ', flightKey);
         return flightKey;
     }
@@ -27,17 +26,17 @@ export class FlightChainLogic {
     static verifyValidACRIS(flight: AcrisFlight): void {
 
         if (!flight || !flight.operatingAirline || !flight.operatingAirline.iataCode || flight.operatingAirline.iataCode.length !== 2) {
-            let msg = `Invalid flight data, there is no valid flight.operatingAirline.iataCode set.`;
+            const msg = `Invalid flight data, there is no valid flight.operatingAirline.iataCode set.`;
             console.log(msg, flight);
             throw new Error(msg);
         }
         if (!flight || !flight.departureAirport || flight.departureAirport.length !== 3) {
-            let msg = 'Invalid flight data, there is no valid flight.departureAirport set.';
+            const msg = 'Invalid flight data, there is no valid flight.departureAirport set.';
             console.log(msg, flight);
             throw new Error(msg);
         }
         if (!flight || !flight.arrivalAirport || flight.arrivalAirport.length !== 3) {
-            let msg = 'Invalid flight data, there is no valid flight.arrivalAirport set.';
+            const msg = 'Invalid flight data, there is no valid flight.arrivalAirport set.';
             console.log(msg, flight);
             throw new Error(msg);
         }
@@ -53,24 +52,24 @@ export class FlightChainLogic {
     public static verifyAbleToCreateOrModifyFlight(iata_code: string, flight: AcrisFlight): void {
 
         if (!iata_code || iata_code.length > 3) {
-            let msg = `Invalid iata-code '${iata_code}' `;
+            const msg = `Invalid iata-code '${iata_code}' `;
             console.log(msg);
             throw new Error(msg);
         }
 
         if (this.isAirline(iata_code)) {
-            let operatingAirlne = this.getOperatingAirline(flight);
+            const operatingAirlne = this.getOperatingAirline(flight);
             if (operatingAirlne.toUpperCase() !== iata_code.toUpperCase()) {
-                let msg = `Operating airline '${operatingAirlne}' does not match certificate iata-code '${iata_code}'`;
+                const msg = `Operating airline '${operatingAirlne}' does not match certificate iata-code '${iata_code}'`;
                 console.log(msg);
                 throw new Error(msg);
             }
         } else {
-            let departureAirport = this.getDepartureAirport(flight);
-            let arrivalAirport = this.getArrivalAirport(flight);
+            const departureAirport = this.getDepartureAirport(flight);
+            const arrivalAirport = this.getArrivalAirport(flight);
             if (iata_code.toUpperCase() !== departureAirport.toUpperCase() &&
                 iata_code.toUpperCase() !== arrivalAirport.toUpperCase()) {
-                let msg = `The iata airport code ${iata_code} does not match the departure airport (${departureAirport}) or the arrival airport (${arrivalAirport})`;
+                const msg = `The iata airport code ${iata_code} does not match the departure airport (${departureAirport}) or the arrival airport (${arrivalAirport})`;
                 console.log(msg);
                 throw new Error(msg);
             }

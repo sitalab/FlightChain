@@ -23,11 +23,6 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -c | --channel)
-	    CHANNEL_NAME="$2"
-	    shift
-	    shift
-	    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -48,7 +43,7 @@ if [[ -n "${CHAINCODEVERSION/[ ]*\n/}" ]]
 then
     echo CHAINCODEVERSION  = "${CHAINCODEVERSION}"
 else
-    echo "you must specify the chain code version number (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
+    echo "you must specify the chain code version number (e.g. $0 -v 1.2 -n flightchain)"
     exit 1;
 fi
 
@@ -56,17 +51,8 @@ if [[ -n "${CHAINCODENAME/[ ]*\n/}" ]]
 then
     echo CHAINCODENAME     = "${CHAINCODENAME}"
 else
-    echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
+    echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain)"
     exit 1;
-fi
-
-# check for channel
-if [[ -n "${CHANNEL_NAME/[ ]*\n/}" ]]
-then
-	echo CHANNEL_NAME    = "${CHANNEL_NAME}"
-else
-	echo "you must specify the channel (e.g. $0 -v 1.2 -n flightchain -c channel-flight-chain)"
-	exit 1;
 fi
 
 if [ -d "node_modules" ]; then
@@ -109,8 +95,10 @@ docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/g
 echo "INSTALL ${CHAINCODENAME} ${CHAINCODEVERSION} on peer0.sandbox.sita.aero:7051"
 docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer0.sandbox.sita.aero:7051" cli peer chaincode install -n $CHAINCODENAME -v $CHAINCODEVERSION -p "$NODE_SRC_PATH" -l "$LANGUAGE"
 
+CHANNEL_NAME="channel-flight-chain"
+
 echo "INSTANTIATE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME}"
-docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -l "$LANGUAGE" -v $CHAINCODEVERSION -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -v $CHAINCODEVERSION -l "$LANGUAGE" -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
 sleep 10
 
 echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer0.sandbox.sita.aero:7051"
@@ -118,6 +106,21 @@ docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/g
 
 echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer1.sandbox.sita.aero:7051"
 docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer1.sandbox.sita.aero:7051" cli peer chaincode invoke -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+
+
+CHANNEL_NAME="channel-flight-chain-mia"
+
+echo "INSTANTIATE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME}"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" cli peer --logging-level debug chaincode instantiate -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -v $CHAINCODEVERSION -l "$LANGUAGE" -c '{"Args":[""]}' -P "OR ('SITAMSP.member','Org2MSP.member')"
+sleep 10
+
+echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer0.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer0.sandbox.sita.aero:7051" cli peer chaincode invoke -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+
+echo "INVOKE ${CHAINCODENAME} ${CHAINCODEVERSION}, channel ${CHANNEL_NAME} on peer1.sandbox.sita.aero:7051"
+docker exec -e "CORE_PEER_LOCALMSPID=SITAMSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/sandbox.sita.aero/users/Admin@sandbox.sita.aero/msp" -e "CORE_PEER_ADDRESS=peer1.sandbox.sita.aero:7051" cli peer chaincode invoke -o orderer.sita.aero:7050 -C $CHANNEL_NAME -n $CHAINCODENAME -c '{"function":"initLedger","Args":[""]}'
+
+
 
 
 echo ""

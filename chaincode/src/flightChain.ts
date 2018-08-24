@@ -1,16 +1,10 @@
-/*
-# Copyright IBM Corp. All Rights Reserved.
-#
-# SPDX-License-Identifier: Apache-2.0
-*/
-
 'use strict';
 
 import {Chaincode, StubHelper} from '@theledger/fabric-chaincode-utils';
 import {CertificateHelper} from './certificateHelper';
 import {FlightChainLogic} from './flightChainLogic';
-import {AcrisFlight} from './acris-schema/AcrisFlight';
-var merge = require('deepmerge')
+
+const merge = require('deepmerge');
 
 export class FlightChain extends Chaincode {
 
@@ -26,7 +20,6 @@ export class FlightChain extends Chaincode {
     async initLedger(stubHelper: StubHelper, args: string[]) {
         console.log('============= START : initLedger ===========');
         await stubHelper.putState('version', 'MyVersion');
-
     }
 
     /**
@@ -38,7 +31,7 @@ export class FlightChain extends Chaincode {
      */
     async version(stubHelper: StubHelper, args: string[]): Promise<any> {
         console.log('============= START : version ===========');
-        return  await stubHelper.getStateAsObject('version');
+        return await stubHelper.getStateAsObject('version');
     }
 
     /**
@@ -54,8 +47,8 @@ export class FlightChain extends Chaincode {
         if (args.length !== 1) {
             throw new Error('Incorrect number of arguments. Expecting FlightKey ex: 2018-07-22LHRBA0227');
         }
-        let flightKey = args[0];
-        return  await stubHelper.getStateAsObject(flightKey);
+        const flightKey = args[0];
+        return await stubHelper.getStateAsObject(flightKey);
     }
 
     /**
@@ -69,9 +62,9 @@ export class FlightChain extends Chaincode {
         console.log('============= START : getFlightHistory ===========');
 
         if (args.length < 1) {
-            throw new Error('Incorrect number of arguments. Expecting 1');
+            throw new Error('Incorrect number of arguments. Expecting FlightKey ex: 2018-07-22LHRBA0227');
         }
-        let flightKey = args[0];
+        const flightKey = args[0];
         console.log('- start getFlightHistory: %s\n', flightKey);
         return await stubHelper.getHistoryForKeyAsList(flightKey);
     }
@@ -87,17 +80,17 @@ export class FlightChain extends Chaincode {
         console.log('============= START : Create Flight ===========');
         console.log('stub.getCreator', stubHelper.getClientIdentity());
 
-        let iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
+        const iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
 
         if (args.length !== 1) {
-            throw new Error('Incorrect number of arguments. Expecting 1');
+            throw new Error('Incorrect number of arguments. Expecting one argument containing ACRIS flight data.');
         }
         console.log(args[0]);
 
-        let flight: any = JSON.parse(args[0]);
+        const flight: any = JSON.parse(args[0]);
 
         if (!flight) {
-            let msg = `No ACRIS flightdata passed in as arg[0] '${args[0]}'`;
+            const msg = `No ACRIS flightdata passed in as arg[0] '${args[0]}'`;
             console.error(msg);
             throw new Error(msg);
         }
@@ -105,10 +98,10 @@ export class FlightChain extends Chaincode {
         FlightChainLogic.verifyValidACRIS(flight);
         FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, flight);
 
-        let flightKey = FlightChainLogic.generateUniqueKey(flight);
-        let existingFlight = await stubHelper.getStateAsObject(flightKey);
+        const flightKey = FlightChainLogic.generateUniqueKey(flight);
+        const existingFlight = await stubHelper.getStateAsObject(flightKey);
         if (existingFlight) {
-            let msg = `A flight with this flight key '${flightKey}' already exists`;
+            const msg = `A flight with this flight key '${flightKey}' already exists`;
             console.error(msg);
             throw new Error(msg);
         }
@@ -134,26 +127,24 @@ export class FlightChain extends Chaincode {
     async updateFlight(stubHelper: StubHelper, args: string[]): Promise<any> {
         console.log(`============= START : updateFlight key ${args[0]} ===========`);
         if (args.length !== 2) {
-            throw new Error('Incorrect number of arguments. Expecting 2 (flightKey & new flight data)');
+            throw new Error('Incorrect number of arguments. Expecting 2 (flightKey & new ACRIS flight data)');
         }
-        let iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
+        const iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
 
-        let flightKey = args[0];
-        let flightDelta = JSON.parse(args[1]);
-
+        const flightKey = args[0];
+        const flightDelta = JSON.parse(args[1]);
 
         // TODO: Verify that the flight already exists & return appropriate error 404 message if it does not exist
-        let existingFlight:any = await stubHelper.getStateAsObject(flightKey);
+        const existingFlight: any = await stubHelper.getStateAsObject(flightKey);
         if (!existingFlight) {
-            let msg = `A flight with this flight key '${flightKey}' does not yet exist. It must be created first`;
+            const msg = `A flight with this flight key '${flightKey}' does not yet exist. It must be created first`;
             console.error(msg);
             throw new Error(msg);
         }
 
-
         FlightChainLogic.verifyAbleToCreateOrModifyFlight(iataCode, existingFlight);
 
-        let mergedFlight = merge(existingFlight, flightDelta);
+        const mergedFlight = merge(existingFlight, flightDelta);
         console.log('flightDelta', flightDelta);
         console.log('existingFlight', existingFlight);
         console.log('mergedFlight', mergedFlight);
