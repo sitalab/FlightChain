@@ -23,6 +23,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    -c | --channel)
+   CHANNEL_NAME="$2"
+   shift
+   shift
+   ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -52,6 +57,14 @@ then
     echo CHAINCODENAME     = "${CHAINCODENAME}"
 else
     echo "you must specify the chain code name (e.g. $0 -v 1.2 -n flightchain)"
+    exit 1;
+fi
+
+if [[ -n "${CHANNEL_NAME/[ ]*\n/}" ]]
+then
+    echo CHANNEL_NAME      ="$[CHANNEL_NAME]"
+else
+    echo "you must specify the channel name (e.g. $0 -c mychannel)"
     exit 1;
 fi
 
