@@ -100,7 +100,7 @@ export class FlightChainService {
      */
     public async findOneFlight(channelName: string, flightKey: string): Promise<AcrisFlight> {
 
-        console.log(`FlightChainService.findOneFlight('${flightKey}')`);
+        console.log(`FlightChainService.findOneFlight('${channelName}', '${flightKey}')`);
 
         this.validateChannel(channelName);
         const request = {
@@ -121,7 +121,7 @@ export class FlightChainService {
      * @param flightKey
      */
     public async findFlightHistory(channelName: string, flightKey: any): Promise<AcrisFlight> {
-        console.log(`FlightChainService.findFlightHistory('${flightKey}')`);
+        console.log(`FlightChainService.findFlightHistory('${channelName}', ${flightKey}')`);
         this.validateChannel(channelName);
         const request: ChaincodeInvokeRequest = {
             // targets : --- letting this default to the peers assigned to the channel
@@ -141,7 +141,7 @@ export class FlightChainService {
      * @param flight
      */
     public async createFlight(channelName: string, flight: AcrisFlight): Promise<any> {
-        console.log('FlightChainService.createFlight()');
+        console.log(`FlightChainService.createFlight(\'${channelName}\')`);
         this.validateChannel(channelName);
         // get a transaction id object based on the current user assigned to fabric client
         const tx_id = this.fabric_client.newTransactionID();
@@ -168,7 +168,7 @@ export class FlightChainService {
      * @param flightDelta
      */
     public async updateFlight(channelName: string, flightKey: string, flightDelta: AcrisFlight): Promise<AcrisFlight> {
-        console.log(`FlightChainService.updateFlight(${flightKey})`);
+        console.log(`FlightChainService.updateFlight('${channelName}', '${flightKey}')`);
         this.validateChannel(channelName);
         // get a transaction id object based on the current user assigned to fabric client
         const tx_id = this.fabric_client.newTransactionID();
@@ -193,7 +193,7 @@ export class FlightChainService {
      * @param transactionId
      */
     public async getTransactionInfo(channelName: string, transactionId: string): Promise<AcrisFlight> {
-        console.log(`FlightChainService.getTransactionInfo(${transactionId})`);
+        console.log(`FlightChainService.getTransactionInfo('${channelName}', '${transactionId}')`);
         this.validateChannel(channelName);
         const transactionInfo: any = await this.channels[channelName].queryTransaction(transactionId).catch((err: Error) => {
             console.error('error getting transaction id', err);
@@ -361,7 +361,10 @@ export class FlightChainService {
             throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
         });
 
-        if (query_responses && query_responses.length === 1) {
+        /**
+         * TODO: Implement handling for multiple responses from multiple peers.  Can we just take the response at query_response[0] ?
+         */
+        if (query_responses && query_responses.length >= 1) {
             if (query_responses[0] instanceof Error) {
                 console.error('error from query = ', query_responses[0]);
                 throw new HttpException(query_responses[0], HttpStatus.INTERNAL_SERVER_ERROR);
@@ -374,7 +377,7 @@ export class FlightChainService {
                 }
             }
         } else {
-            console.error('No payloads were returned from query');
+            console.error('No payloads were returned from query', query_responses);
             throw new HttpException(query_responses[0], HttpStatus.NOT_FOUND);
         }
         return JSON.parse(query_responses[0].toString());

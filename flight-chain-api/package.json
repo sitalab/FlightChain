@@ -8,7 +8,7 @@
     "format": "prettier --write \"**/*.ts\"",
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
     "start:ba": "LISTEN_PORT=3000 IDENTITY=BA nodemon",
-    "start:lgw": "LISTEN_PORT=3001 IDENTITY=LHR nodemon",
+    "start:lhr": "LISTEN_PORT=3001 IDENTITY=LHR nodemon",
     "start:mia": "LISTEN_PORT=3002 IDENTITY=MIA nodemon",
     "start:gva": "LISTEN_PORT=3003 IDENTITY=GVA nodemon",
     "prestart:prod": "rm -rf dist && tsc",

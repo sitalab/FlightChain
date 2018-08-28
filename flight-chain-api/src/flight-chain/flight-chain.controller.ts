@@ -72,6 +72,7 @@ export class FlightChainController {
         return this.flightChainService.findFlightHistory(channelName, flightKey);
     }
 
+
     @ApiOperation({title: 'Create new flight on the network'})
     @ApiResponse({
         status: 201,
@@ -84,9 +85,8 @@ export class FlightChainController {
         required: false,
         description: 'Name of the fabric channel to execute this transaction on. Defaults to ' + ChannelNames.Default,
     })
-    @Post('/:flightKey')
+    @Post()
     public async createFlight(
-        @Param('flightKey') flightKey,
         @Body() flight: AcrisFlight,
         @Query('channelName') channelName: ChannelNames = ChannelNames.Default): Promise<AcrisFlight> {
         console.log(`FlightChainController.createFlight(channelName=${channelName})`);
