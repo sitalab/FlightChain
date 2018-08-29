@@ -25,6 +25,7 @@ export class FlightChainLogic {
      */
     static verifyValidACRIS(flight: AcrisFlight): void {
 
+
         if (!flight || !flight.operatingAirline || !flight.operatingAirline.iataCode || flight.operatingAirline.iataCode.length !== 2) {
             const msg = `Invalid flight data, there is no valid flight.operatingAirline.iataCode set.`;
             console.log(msg, flight);
@@ -37,6 +38,16 @@ export class FlightChainLogic {
         }
         if (!flight || !flight.arrivalAirport || flight.arrivalAirport.length !== 3) {
             const msg = 'Invalid flight data, there is no valid flight.arrivalAirport set.';
+            console.log(msg, flight);
+            throw new Error(msg);
+        }
+        if (!flight || !flight.flightNumber || !flight.flightNumber.trackNumber || flight.flightNumber.trackNumber.length !== 4) {
+            const msg = 'Invalid flight data, there is no valid 4 digit flight.flightNumber.trackNumber set.';
+            console.log(msg, flight);
+            throw new Error(msg);
+        }
+        if (!flight || !flight.originDate || !Date.parse(flight.originDate)) {
+            const msg = 'Invalid flight data, there is no valid flight.originDate set (e.g. 2018-09-13).';
             console.log(msg, flight);
             throw new Error(msg);
         }

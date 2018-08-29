@@ -78,7 +78,7 @@ export class FlightChain extends Chaincode {
      */
     async createFlight(stubHelper: StubHelper, args: string[]): Promise<any> {
         console.log('============= START : Create Flight ===========');
-        console.log('stub.getCreator', stubHelper.getClientIdentity());
+        // console.log('stub.getCreator', stubHelper.getClientIdentity());
 
         const iataCode = CertificateHelper.getIataCode(stubHelper.getClientIdentity());
 
@@ -86,7 +86,6 @@ export class FlightChain extends Chaincode {
             throw new Error('Incorrect number of arguments. Expecting one argument containing ACRIS flight data.');
         }
         console.log(args[0]);
-
         const flight: any = JSON.parse(args[0]);
 
         if (!flight) {
@@ -150,6 +149,13 @@ export class FlightChain extends Chaincode {
         console.log('mergedFlight', mergedFlight);
 
         FlightChainLogic.verifyValidACRIS(mergedFlight);
+
+        const mergedFlightKey = FlightChainLogic.generateUniqueKey(mergedFlight);
+        if (mergedFlightKey !== flightKey) {
+            const msg = `You cannot change data that will modify the flight key (originDate, departureAirport, operatingAirline.iataCode or flightNumber.trackNumber)`;
+            console.error(msg);
+            throw new Error(msg);
+        }
 
         // TODO: Is this best place to add these values ? The history doesn't seem to easily allow way to determine who updates.
         mergedFlight.updaterId = iataCode;

@@ -30,6 +30,24 @@ describe('Test FlightChain', () => {
         'zUgHZTBYcbp3axh5U84MXw==' +
         '-----END CERTIFICATE-----';
 
+    let cert_MIA= '-----BEGIN CERTIFICATE-----' +
+        'MIICsTCCAligAwIBAgIUEYRfX0N1Uik7Oq9pktiJ5xkvz2IwCgYIKoZIzj0EAwIw' +
+        'dTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh' +
+        'biBGcmFuY2lzY28xGjAYBgNVBAoTEXNhbmRib3guc2l0YS5hZXJvMR0wGwYDVQQD' +
+        'ExRjYS5zYW5kYm94LnNpdGEuYWVybzAeFw0xODA4MjgwOTE1MDBaFw0xOTA4Mjgw' +
+        'OTIwMDBaMEkxOTAWBgNVBAsTD0ZsaWdodENoYWluVXNlcjALBgNVBAsTBG9yZzEw' +
+        'EgYDVQQLEwtkZXBhcnRtZW50MTEMMAoGA1UEAxMDTUlBMFkwEwYHKoZIzj0CAQYI' +
+        'KoZIzj0DAQcDQgAEyXqhS36q+K7XLZLGBx/HLzbXto+SpvEDQiJTOeeYSvmfIwyp' +
+        'tTp0YLuwxt98L8wGqs2xiEh8K/M4DM9HYE+aMKOB8TCB7jAOBgNVHQ8BAf8EBAMC' +
+        'B4AwDAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUhoH/g5Z/wZyzjWRtmxUkpE4Dwlgw' +
+        'KwYDVR0jBCQwIoAgu7wYI4G3X0pTpyHF7rUJHs1h4ZtIYKwvtQ+r+fan4RUwgYEG' +
+        'CCoDBAUGBwgBBHV7ImF0dHJzIjp7ImhmLkFmZmlsaWF0aW9uIjoib3JnMS5kZXBh' +
+        'cnRtZW50MSIsImhmLkVucm9sbG1lbnRJRCI6Ik1JQSIsImhmLlR5cGUiOiJGbGln' +
+        'aHRDaGFpblVzZXIiLCJpYXRhLWNvZGUiOiJNSUEifX0wCgYIKoZIzj0EAwIDRwAw' +
+        'RAIgRJ/kKkxcARb1PWdMtr0l5x6aNh5uOteHgVLzsCKFQn4CIDbAUVRF4qVQwJl6' +
+        'xdC9qbXfXLDzf2UL+d60mi/bPK4M' +
+        '-----END CERTIFICATE-----';
+
     it("Should init without issues", async () => {
         const stub = new ChaincodeMockStub("MyMockStub", chaincode);
         const response = await stub.mockInit("tx1", []);
@@ -71,16 +89,79 @@ describe('Test FlightChain', () => {
         expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"A flight with this flight key \'2017-04-05MIABA1481\' already exists"}');
     });
 
+    it("Should NOT add a flight if the json is invalid", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid flight.operatingAirline.iataCode set."}');
+    });
+    it("Should NOT add a flight if the json is missing departureAirport", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({operatingAirline:{iataCode:"BA"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid flight.departureAirport set."}');
+    });
+    it("Should NOT add a flight if the json is missing arrivalAirport", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({departureAirport:"LHR", operatingAirline:{iataCode:"BA"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid flight.arrivalAirport set."}');
+    });
+    it("Should NOT add a flight if the json is missing flightnumber", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({departureAirport:"LHR", arrivalAirport:"ORK", operatingAirline:{iataCode:"BA"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid 4 digit flight.flightNumber.trackNumber set."}');
+    });
+    it("Should NOT add a flight if the json is missing originDate", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({flightNumber:{trackNumber:"0132"}, departureAirport:"LHR", arrivalAirport:"ORK", operatingAirline:{iataCode:"BA"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid flight.originDate set (e.g. 2018-09-13)."}');
+    });
+    it("Should NOT add a flight if the json has invalid originDate", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
+
+        //let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify({originDate: "0-0-0", flightNumber:{trackNumber:"0132"}, departureAirport:"LHR", arrivalAirport:"ORK", operatingAirline:{iataCode:"BA"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Invalid flight data, there is no valid flight.originDate set (e.g. 2018-09-13)."}');
+    });
     it("Should NOT add a flight because operating airline doesn't match certificate", async () => {
         const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
 
-        let flightObject = createFlight('2017-04-05', 'AA', '1481', 'MIA', 'SDQ');
+        let flightObject = createFlight('2018-01-01', 'AA', '1481', 'MIA', 'SDQ');
 
-        const response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
-
-
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"Operating airline \'AA\' does not match certificate iata-code \'BA\'"}');
     });
 
+    it("Should NOT add a flight because departure or arrival airport doesn't match certificate", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_MIA);
+
+        let flightObject = createFlight('2017-04-05', 'AA', '1481', 'DUB', 'SDQ');
+
+        const responseExpectFail = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"The iata airport code MIA does not match the departure airport (DUB) or the arrival airport (SDQ)"}');
+    });
 
     it("Should correctly MERGE a flight", async () => {
         const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
@@ -104,223 +185,54 @@ describe('Test FlightChain', () => {
 
     });
 
+    it("Should NOT merge a flight because departure date is changed", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
 
-    /*
-        it("Should be able to init and query all cars", async () => {
-            stubWithInit = new ChaincodeMockStub("MyMockStub", chaincode);
+        let NEW_ESTIMATED_ARRIVAL = '2018-07-31T08:04:00-06:00';
+        let flightObject = createFlight('2017-04-05', 'BA', '1481', 'MIA', 'SDQ');
+        let response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(response.status).to.eql(200)
 
-            const response = await stubWithInit.mockInvoke("txID1", ["initLedger"]);
+        let responseExpectFail = await stub.mockInvoke("tx1", ['updateFlight', '2017-04-05MIABA1481', JSON.stringify({ originDate:"2010-01-01"})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"You cannot change data that will modify the flight key (originDate, departureAirport, operatingAirline.iataCode or flightNumber.trackNumber)"}');
+    });
+    it("Should NOT merge a flight because departure airport is changed", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
 
-            expect(response.status).to.eql(200);
+        let NEW_ESTIMATED_ARRIVAL = '2018-07-31T08:04:00-06:00';
+        let flightObject = createFlight('2017-04-05', 'BA', '1481', 'MIA', 'SDQ');
+        let response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(response.status).to.eql(200)
 
-            const queryResponse = await stubWithInit.mockInvoke("txID2", ["queryAllCars"]);
+        let responseExpectFail = await stub.mockInvoke("tx1", ['updateFlight', '2017-04-05MIABA1481', JSON.stringify({ departureAirport:"ORK"})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"You cannot change data that will modify the flight key (originDate, departureAirport, operatingAirline.iataCode or flightNumber.trackNumber)"}');
+    });
+    it("Should NOT merge a flight because operating airline is changed", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
 
-            expect(Transform.bufferToObject(queryResponse.payload)).to.deep.eq([
-                {
-                    make: 'Toyota',
-                    model: 'Prius',
-                    color: 'blue',
-                    owner: 'Tomoko',
-                    docType: 'car'
-                },
-                {
-                    make: 'Ford',
-                    model: 'Mustang',
-                    color: 'red',
-                    owner: 'Brad',
-                    docType: 'car'
-                },
-                {
-                    make: 'Hyundai',
-                    model: 'Tucson',
-                    color: 'green',
-                    owner: 'Jin Soo',
-                    docType: 'car'
-                },
-                {
-                    make: 'Volkswagen',
-                    model: 'Passat',
-                    color: 'yellow',
-                    owner: 'Max',
-                    docType: 'car'
-                },
-                {
-                    make: 'Tesla',
-                    model: 'S',
-                    color: 'black',
-                    owner: 'Adriana',
-                    docType: 'car'
-                },
-                {
-                    make: 'Peugeot',
-                    model: '205',
-                    color: 'purple',
-                    owner: 'Michel',
-                    docType: 'car'
-                },
-                {
-                    make: 'Chery',
-                    model: 'S22L',
-                    color: 'white',
-                    owner: 'Aarav',
-                    docType: 'car'
-                },
-                {
-                    make: 'Fiat',
-                    model: 'Punto',
-                    color: 'violet',
-                    owner: 'Pari',
-                    docType: 'car'
-                },
-                {
-                    make: 'Tata',
-                    model: 'Nano',
-                    color: 'indigo',
-                    owner: 'Valeria',
-                    docType: 'car'
-                },
-                {
-                    make: 'Holden',
-                    model: 'Barina',
-                    color: 'violet',
-                    owner: 'Shotaro',
-                    docType: 'car'
-                }
-            ])
-        });
+        let NEW_ESTIMATED_ARRIVAL = '2018-07-31T08:04:00-06:00';
+        let flightObject = createFlight('2017-04-05', 'BA', '1481', 'MIA', 'SDQ');
+        let response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(response.status).to.eql(200)
 
-        it("Should be able to add a car", async () => {
-            const stub = new ChaincodeMockStub("MyMockStub", chaincode);
+        let responseExpectFail = await stub.mockInvoke("tx1", ['updateFlight', '2017-04-05MIABA1481', JSON.stringify({ operatingAirline:{iataCode:"FR"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"You cannot change data that will modify the flight key (originDate, departureAirport, operatingAirline.iataCode or flightNumber.trackNumber)"}');
+    });
+    it("Should NOT merge a flight because flightnumber is changed", async () => {
+        const stub = new ChaincodeMockStub("MyMockStub", chaincode, cert_BA);
 
-            const response = await stub.mockInvoke("tx1", ['createCar', JSON.stringify({
-                key: 'CAR0',
-                make: "prop1",
-                model: "prop2",
-                color: "prop3",
-                owner: 'owner'
-            })]);
+        let NEW_ESTIMATED_ARRIVAL = '2018-07-31T08:04:00-06:00';
+        let flightObject = createFlight('2017-04-05', 'BA', '1481', 'MIA', 'SDQ');
+        let response = await stub.mockInvoke("tx1", ['createFlight', JSON.stringify(flightObject)]);
+        expect(response.status).to.eql(200)
 
-            expect(response.status).to.eql(200)
-
-            const response = await stub.mockInvoke("tx1", ['queryCar', JSON.stringify({
-                key: `CAR0`
-            })]);
-
-            expect(Transform.bufferToObject(response.payload)).to.deep.eq({
-                'make': 'prop1',
-                'model': 'prop2',
-                'color': 'prop3',
-                'owner': 'owner',
-                'docType': 'car'
-            })
-        });
-
-        it("Should be able to add a private car", async () => {
-            const stub = new ChaincodeMockStub("MyMockStub", chaincode);
-
-            const response = await stub.mockInvoke("tx1", ['createPrivateCar', JSON.stringify({
-                key: 'CAR0',
-                make: "prop1",
-                model: "prop2",
-                color: "prop3",
-                owner: 'owner'
-            })]);
-
-            expect(response.status).to.eql(200);
-
-            expect(Transform.bufferToObject(stub.privateCollections["testCollection"]["CAR0"])).to.deep.eq({
-                'make': 'prop1',
-                'model': 'prop2',
-                'color': 'prop3',
-                'owner': 'owner',
-                'docType': 'car'
-            })
-        });
-
-        it("Should be able to get a private car", async () => {
-            const stub = new ChaincodeMockStub("MyMockStub", chaincode);
-
-            const response = await stub.mockInvoke("tx1", ['createPrivateCar', JSON.stringify({
-                key: 'CAR0',
-                make: "prop1",
-                model: "prop2",
-                color: "prop3",
-                owner: 'owner'
-            })]);
-
-            expect(response.status).to.eql(200);
-
-
-            const queryRes = await stub.mockInvoke("tx4", ['queryPrivateCar', JSON.stringify({
-                key: `CAR0`
-            })]);
-
-            expect(Transform.bufferToObject(queryRes.payload)).to.deep.eq({
-                'make': 'prop1',
-                'model': 'prop2',
-                'color': 'prop3',
-                'owner': 'owner',
-                'docType': 'car'
-            })
-        });
-
-        it("Should be able to update a car", async () => {
-            const stub = new ChaincodeMockStub("MyMockStub", chaincode);
-
-            const response = await stub.mockInvoke("tx1", ['createCar', JSON.stringify({
-                key: 'CAR0',
-                make: "prop1",
-                model: "prop2",
-                color: "prop3",
-                owner: 'owner'
-            })]);
-
-            expect(response.status).to.eql(200);
-
-            const response = await stub.mockInvoke("tx2", ['queryCar', JSON.stringify({
-                key: `CAR0`
-            })]);
-
-            expect(Transform.bufferToObject(response.payload)).to.deep.eq({
-                'make': 'prop1',
-                'model': 'prop2',
-                'color': 'prop3',
-                'owner': 'owner',
-                'docType': 'car'
-            });
-
-            const response = await stub.mockInvoke("tx3", ['changeCarOwner', JSON.stringify({
-                key: `CAR0`,
-                owner: 'newOwner'
-            })]);
-
-            expect(response.status).to.eql(200);
-
-            const response = await stub.mockInvoke("tx4", ['queryCar', JSON.stringify({
-                key: `CAR0`
-            })]);
-
-
-            expect(Transform.bufferToObject(response.payload).owner).to.eq("newOwner")
-        });
-
-        it("Should be able to run rich query", async () => {
-            const response = await stubWithInit.mockInvoke("tx1", ['richQueryAllCars']);
-
-            expect(response.status).to.eql(200);
-
-            expect(Transform.bufferToObject(response.payload)).to.be.length(10);
-        });
-
-        it("Should be able to run gethistoryForKey", async () => {
-            const response = await stubWithInit.mockInvoke("tx1", ['getCarHistory']);
-
-            expect(response.status).to.eql(200);
-
-            expect(Transform.bufferToObject(response.payload)).to.be.length(1);
-            expect(Transform.bufferToObject(response.payload)[0].value.owner).to.eq("Tomoko")
-        });
-    */
+        let responseExpectFail = await stub.mockInvoke("tx1", ['updateFlight', '2017-04-05MIABA1481', JSON.stringify({ flightNumber:{trackNumber:"9999"}})]);
+        expect(responseExpectFail.status).to.eql(500)
+        expect(responseExpectFail.message).to.eql('{"name":"Error","status":500,"message":"You cannot change data that will modify the flight key (originDate, departureAirport, operatingAirline.iataCode or flightNumber.trackNumber)"}');
+    });
 });
 
 
@@ -337,7 +249,7 @@ function createFlight(originDate: string, operatingAirline: string, flightNumber
         '    "registration": "N606AA"\n' +
         '  },\n' +
         '  "flightNumber": {\n' +
-        '    "airlineCode": "AA",\n' +
+        '    "airlineCode": "' + operatingAirline + '",\n' +
         '    "trackNumber": "' + flightNumber + '"\n' +
         '  },\n' +
         '  "departureAirport": "' + depAirport + '",\n' +
